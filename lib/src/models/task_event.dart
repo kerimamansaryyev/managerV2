@@ -1,7 +1,7 @@
 import 'package:manager/src/models/task.dart';
 import 'package:meta/meta.dart';
 
-enum TaskProgressStatus { loading, error, success }
+enum TaskProgressStatus { loading, error, success, killed }
 
 @immutable
 abstract class TaskEvent<T> {
@@ -10,13 +10,13 @@ abstract class TaskEvent<T> {
 }
 
 class TaskLoadingEvent<T> implements TaskEvent<T> {
-  TaskLoadingEvent(this.task);
-
   @override
   final Task<T> task;
 
   @override
   TaskProgressStatus get status => TaskProgressStatus.loading;
+
+  const TaskLoadingEvent(this.task);
 }
 
 class TaskErrorEvent<T> implements TaskEvent<T> {
@@ -29,7 +29,7 @@ class TaskErrorEvent<T> implements TaskEvent<T> {
   final dynamic exception;
   final StackTrace? stackTrace;
 
-  TaskErrorEvent(this.task, this.exception, this.stackTrace);
+  const TaskErrorEvent(this.task, this.exception, this.stackTrace);
 }
 
 class TaskSuccessEvent<T> implements TaskEvent<T> {
@@ -41,5 +41,15 @@ class TaskSuccessEvent<T> implements TaskEvent<T> {
 
   final T result;
 
-  TaskSuccessEvent(this.task, this.result);
+  const TaskSuccessEvent(this.task, this.result);
+}
+
+class TaskKillEvent<T> implements TaskEvent<T> {
+  @override
+  TaskProgressStatus get status => TaskProgressStatus.killed;
+
+  @override
+  final Task<T> task;
+
+  const TaskKillEvent(this.task);
 }

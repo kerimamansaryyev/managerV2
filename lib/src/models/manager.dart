@@ -8,7 +8,7 @@ typedef AsyncTaskCompleterReferenceTable<T>
     = Map<String, AsyncTaskCompleterReference<T>>;
 
 abstract class Manager<T> {
-  final AsyncTaskCompleterReferenceTable<T> _completers = {};
+  final AsyncTaskCompleterReferenceTable<T> _references = {};
   final StreamController<T> _onStateChangedController =
       StreamController.broadcast();
   final StreamController<TaskEvent<T>> _onEventController =
@@ -23,43 +23,87 @@ abstract class Manager<T> {
   Stream<TaskEvent<T>> on<S extends Task>() =>
       _onEventController.stream.where((event) => event.task is S);
 
-  AsyncTaskCompleterReference<T>? _assureCompleterIsCompleted(
+  AsyncTaskCompleterReference<T>? _stopAndReturnReference(
       AsynchronousTask<T> task) {
-    final reference = _completers[task.id];
+    final reference = _references[task.id];
     if (reference == null) return null;
 
     if (reference.completer.isCompleted) {
       return null;
     }
 
-    _completers.remove(task.id);
+    _references.remove(task.id);
 
     return reference
-      ..timestampSnapshot.checkout()
+      ..cyclestampSnapshot.checkout()
       ..completer.complete();
   }
 
-  void _createReferenceOf(AsynchronousTask<T> task) {
-    _completers[task.id] = AsyncTaskCompleterReference.create(task);
+  AsyncTaskCompleterReference<T> _createReferenceOf(AsynchronousTask<T> task) {
+    return _references[task.id] = AsyncTaskCompleterReference<T>.create(task)
+      ..cyclestampSnapshot.checkout();
   }
 
-  void _changeState(T newState) {
+  AsyncTaskCompleterReference<T>? _getReferenceFromTask(
+          AsynchronousTask<T> task) =>
+      _references[task.id];
+
+  void _changeState(T newState, Task<T> task) {
     _state = newState;
+    _onEventController.add(TaskSuccessEvent<T>(task, _state));
+  }
+
+  void _onAsyncTaskSuccess(
+      T potentialState, AsyncTaskCompleterReference<T> referenceBeforeTask) {
+    final freshReference = _getReferenceFromTask(referenceBeforeTask.task);
+    if (freshReference == null ||
+        referenceBeforeTask.completer.isCompleted ||
+        referenceBeforeTask.isOutDatedComparingTo(freshReference)) {
+      return;
+    }
+    _changeState(potentialState, freshReference.task);
+    freshReference.completer.complete();
+  }
+
+  void _onAsyncTaskError(AsyncTaskCompleterReference<T> referenceBeforeTask,
+      dynamic error, StackTrace? trace) {
+    final freshReference = _getReferenceFromTask(referenceBeforeTask.task);
+    if (freshReference == null ||
+        referenceBeforeTask.completer.isCompleted ||
+        referenceBeforeTask.isOutDatedComparingTo(freshReference)) {
+      return;
+    }
+
+    _onEventController
+        .add(TaskErrorEvent<T>(freshReference.task, error, trace));
+    freshReference.completer.complete();
   }
 
   Future<void> _handleAsyncTask(AsynchronousTask<T> task) async {
-    final previousReferencedTask = _assureCompleterIsCompleted(task)?.task;
-    _createReferenceOf(task);
+    final reference = _getReferenceFromTask(task);
+    if (reference != null &&
+        reference.task.waitForPreviousIdenticalTask &&
+        !reference.completer.isCompleted) {
+      return;
+    }
+
+    final stoppedTaskReference = _stopAndReturnReference(task)?.task;
 
     _onEventController.add(TaskLoadingEvent<T>(task));
 
-    if (previousReferencedTask != null) {
-      await previousReferencedTask.kill();
+    if (stoppedTaskReference != null && stoppedTaskReference.shouldKBeKilled) {
+      await stoppedTaskReference.kill();
     }
+
+    final newTaskReference = _createReferenceOf(task);
+
+    task.run().then((value) => _onAsyncTaskSuccess(value, newTaskReference),
+        onError: (error, stackTrace) =>
+            _onAsyncTaskError(newTaskReference, error, stackTrace));
   }
 
   void _handleSyncTask(SynchronousTask<T> task) {
-    _changeState((task).run());
+    _changeState((task).run(), task);
   }
 
   void run(Task<T> task) {
@@ -68,6 +112,12 @@ abstract class Manager<T> {
     } else if (task is SynchronousTask<T>) {
       _handleSyncTask(task);
     }
+  }
+
+  Future<void> kill(AsynchronousTask<T> task) async {
+    _stopAndReturnReference(task);
+    await task.kill();
+    _onEventController.add(TaskKillEvent<T>(task));
   }
 
   void dispose() {

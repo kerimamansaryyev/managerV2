@@ -1,13 +1,11 @@
 import 'dart:async';
 
 abstract class Task<T> {
-  DateTime? _timeStamp;
-
-  DateTime? get timeStamp => _timeStamp;
-
   FutureOr<T> run();
 
   String get id;
+
+  const Task();
 }
 
 abstract class AsynchronousTask<T> extends Task<T> {
@@ -17,9 +15,14 @@ abstract class AsynchronousTask<T> extends Task<T> {
   FutureOr<void> kill();
 
   bool get shouldKBeKilled;
+  bool get waitForPreviousIdenticalTask;
+
+  const AsynchronousTask();
 }
 
 abstract class SynchronousTask<T> extends Task<T> {
   @override
   T run();
+
+  const SynchronousTask();
 }
