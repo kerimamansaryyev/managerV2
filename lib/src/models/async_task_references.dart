@@ -3,42 +3,22 @@ import 'dart:async';
 import 'package:manager/src/models/task.dart';
 import 'package:meta/meta.dart';
 
-class AsyncTaskCompleteReferenceCyclestamp {
-  int? _cycle;
-
-  int? get cycle => _cycle;
-
-  void checkout() {
-    if (_cycle == null) {
-      _cycle = 0;
-      return;
-    }
-
-    _cycle = _cycle! + 1;
-  }
-}
-
 @immutable
 class AsyncTaskCompleterReference<T> {
   final AsynchronousTask<T> task;
-  final Completer<T> completer;
-  final AsyncTaskCompleteReferenceCyclestamp cyclestampSnapshot;
 
-  bool isOutDatedComparingTo(AsyncTaskCompleterReference other) {
-    if (other.cyclestampSnapshot.cycle == null) return false;
-    if (cyclestampSnapshot.cycle == null) return true;
+  @protected
+  final Completer<void> completer;
 
-    return other.cyclestampSnapshot.cycle! > cyclestampSnapshot.cycle!;
-  }
+  Future<void> get inernalCompleterFuture => completer.future;
+
+  void completeInternalCompleter() => completer.complete();
+
+  bool get isInternalCompleterCompleted => completer.isCompleted;
 
   const AsyncTaskCompleterReference._(
-      {required this.completer,
-      required this.task,
-      required this.cyclestampSnapshot});
+      {required this.completer, required this.task});
 
   AsyncTaskCompleterReference.create(AsynchronousTask<T> task)
-      : this._(
-            task: task,
-            completer: Completer(),
-            cyclestampSnapshot: AsyncTaskCompleteReferenceCyclestamp());
+      : this._(task: task, completer: Completer());
 }
