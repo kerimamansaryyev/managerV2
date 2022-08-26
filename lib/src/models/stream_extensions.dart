@@ -7,5 +7,7 @@ extension TaskEventStreamExtension<T> on Stream<TaskEvent<T>> {
   Stream<TaskEvent<T>> success() =>
       where((event) => event is TaskSuccessEvent<T>);
 
-  Stream<TaskEvent<T>> error() => where((event) => event is TaskErrorEvent<T>);
+  Stream<TaskEvent<T>> failed() => where((event) => event is TaskErrorEvent<T>);
+
+  Stream<TaskEvent<T>> killed() => where((event) => event is TaskKillEvent<T>);
 }

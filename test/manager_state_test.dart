@@ -7,6 +7,24 @@ void main() {
     final manager = TestManagerStateCountManager(0);
     expect(manager.state, 0);
   });
+
+  group('TestManagerStateCountManager\'s state is mutated by synchronous tasks',
+      () {
+    test(
+        'State is mutated in the given order of the tasks synchronously independent of type or key',
+        () {
+      final manager = TestManagerStateCountManager(0);
+      expectLater(
+          manager.onStateChanged, emitsInOrder([1, 2, 4, 7, emitsDone]));
+      manager.incrementSync0();
+      manager.incrementSync0(id: '1');
+      manager.incrementSync0(incrementBy: 2);
+      manager.incrementSync1(incrementBy: 3);
+      expect(manager.state, 7);
+      manager.dispose();
+    });
+  });
+
   group(
       'TestManagerStateCountManager\'s state is mutated by asynchronous tasks - ',
       () {
@@ -29,7 +47,7 @@ void main() {
     });
 
     test(
-        'Task replications (with the same type) must be prevented and must not affect on the state even if they are not killed',
+        'Task replications (with the same type and id) must be prevented and must not affect on the state even if they are not killed',
         () async {
       final manager = TestManagerStateCountManager(0);
       expectLater(manager.onStateChanged, emitsInOrder([1, 11, emitsDone]));
@@ -45,11 +63,13 @@ void main() {
       manager.dispose();
     });
 
-    test('Tasks with the same type will be ommited', () async {
+    test(
+        'Tasks with the same type will be ommited. Tasks with the same type but different id will run concurrently.',
+        () async {
       final manager = TestManagerStateCountManager(0);
       manager.increment0();
       manager.increment1(incrementBy: 2, delay: const Duration(seconds: 5));
-      manager.increment0();
+      manager.increment0(id: '2');
       await manager
           .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
       await manager
@@ -57,7 +77,7 @@ void main() {
       manager.increment0(incrementBy: 11);
       await manager
           .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
-      expect(manager.state, 14);
+      expect(manager.state, 15);
     });
   });
 }

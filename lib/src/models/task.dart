@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 
 @immutable
 abstract class Task<T> {
+  String? get id;
+
   FutureOr<T> run();
 
   const Task();
