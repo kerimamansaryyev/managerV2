@@ -25,8 +25,9 @@ abstract class Manager<T> {
   String _taskIdPivotRaw<S extends Task<T>>(String? taskId) => '${S}_$taskId';
   Stream<T> get onStateChanged => _onStateChangedController.stream;
   Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
-      _onEventController.stream
-          .where((event) => getReference<S>(taskId: taskId) != null);
+      _onEventController.stream.where((event) =>
+          (taskId == event.task.id && event is S) ||
+          (event is S && taskId == null));
 
   AsyncTaskCompleterReference<T>? _stopAndReturnReference(
       AsynchronousTask<T> task) {
