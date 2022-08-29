@@ -9,24 +9,37 @@ class TestManagerStateCountManager extends Manager<int> {
   void increment0(
           {Duration delay = const Duration(seconds: 3),
           int incrementBy = 1,
-          String? id}) =>
+          required String id}) =>
       run(TestManagerStateAsyncCountIncrementTask0(
           manager: this, incrementBy: incrementBy, delay: delay, id: id));
 
   void increment1(
           {Duration delay = const Duration(seconds: 3),
           int incrementBy = 1,
-          String? id}) =>
+          required String id}) =>
       run(TestManagerStateAsyncCountIncrementTask1(
           manager: this, incrementBy: incrementBy, delay: delay, id: id));
 
-  void incrementSync0({int incrementBy = 1, String? id}) =>
+  void incrementSync0({int incrementBy = 1, required String id}) =>
       run(TestManagerStateSyncIncrementTask0(
           manager: this, incrementBy: incrementBy, id: id));
 
-  void incrementSync1({int incrementBy = 1, String? id}) =>
+  void incrementSync1({int incrementBy = 1, required String id}) =>
       run(TestManagerStateSyncIncrementTask1(
           manager: this, incrementBy: incrementBy, id: id));
+}
+
+class TestManagerStateAsyncCounterErrorTask extends AsynchronousTask<int> {
+  TestManagerStateAsyncCounterErrorTask({required this.id});
+
+  @override
+  final String id;
+
+  @override
+  Future<int> run() async {
+    await Future.delayed(const Duration(seconds: 2));
+    throw Exception('Exception test');
+  }
 }
 
 class TestManagerStateAsyncCountIncrementTask0 extends AsynchronousTask<int> {
@@ -39,7 +52,7 @@ class TestManagerStateAsyncCountIncrementTask0 extends AsynchronousTask<int> {
       {required this.incrementBy,
       required this.delay,
       required this.manager,
-      this.id});
+      required this.id});
 
   @override
   Future<int> run() async {
@@ -48,7 +61,7 @@ class TestManagerStateAsyncCountIncrementTask0 extends AsynchronousTask<int> {
   }
 
   @override
-  final String? id;
+  final String id;
 }
 
 class TestManagerStateAsyncCountIncrementTask1 extends AsynchronousTask<int> {
@@ -61,7 +74,7 @@ class TestManagerStateAsyncCountIncrementTask1 extends AsynchronousTask<int> {
       {required this.incrementBy,
       required this.delay,
       required this.manager,
-      this.id});
+      required this.id});
 
   @override
   Future<int> run() async {
@@ -70,17 +83,17 @@ class TestManagerStateAsyncCountIncrementTask1 extends AsynchronousTask<int> {
   }
 
   @override
-  final String? id;
+  final String id;
 }
 
 class TestManagerStateSyncIncrementTask0 extends SynchronousTask<int> {
   final TestManagerStateCountManager manager;
   final int incrementBy;
   @override
-  final String? id;
+  final String id;
 
   TestManagerStateSyncIncrementTask0(
-      {required this.manager, this.incrementBy = 1, this.id});
+      {required this.manager, this.incrementBy = 1, required this.id});
 
   @override
   int run() {
@@ -92,10 +105,10 @@ class TestManagerStateSyncIncrementTask1 extends SynchronousTask<int> {
   final TestManagerStateCountManager manager;
   final int incrementBy;
   @override
-  final String? id;
+  final String id;
 
   TestManagerStateSyncIncrementTask1(
-      {required this.manager, this.incrementBy = 1, this.id});
+      {required this.manager, this.incrementBy = 1, required this.id});
 
   @override
   int run() {

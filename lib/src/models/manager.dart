@@ -21,8 +21,8 @@ abstract class Manager<T> {
   Manager(T initialValue) : _state = initialValue;
 
   T get state => _state;
-  String _taskIdPivot(Task<T> task) => '${task.runtimeType}_${task.id}';
-  String _taskIdPivotRaw<S extends Task<T>>(String? taskId) => '${S}_$taskId';
+  String _asyncTaskIdPivot(AsynchronousTask<T> task) => task.id;
+  String _asyncTaskIdPivotRaw(String taskId) => taskId;
   Stream<T> get onStateChanged => _onStateChangedController.stream;
   Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
       _onEventController.stream.where((event) =>
@@ -31,7 +31,7 @@ abstract class Manager<T> {
 
   AsyncTaskCompleterReference<T>? _stopAndReturnReference(
       AsynchronousTask<T> task) {
-    final reference = _references[_taskIdPivot(task)];
+    final reference = _references[_asyncTaskIdPivot(task)];
 
     if (reference == null) return null;
 
@@ -39,33 +39,46 @@ abstract class Manager<T> {
       return null;
     }
 
-    _references.remove(_taskIdPivot(task));
+    _references.remove(_asyncTaskIdPivot(task));
 
     return reference..completeInternalCompleter();
   }
 
   AsyncTaskCompleterReference<T> _createReferenceOf(AsynchronousTask<T> task) {
-    return _references[_taskIdPivot(task)] =
+    return _references[_asyncTaskIdPivot(task)] =
         AsyncTaskCompleterReference<T>.create(task);
   }
 
-  AsyncTaskCompleterReference<T>? getReference<S extends Task<T>>(
-          {String? taskId}) =>
-      _references[_taskIdPivotRaw<S>(taskId)];
+  AsyncTaskCompleterReference<T>? getAsyncReferenceOf(
+          {required String taskId}) =>
+      _references[_asyncTaskIdPivotRaw(taskId)];
 
   bool _isReferenceOutDated(AsyncTaskCompleterReference<T> previous) {
     return previous.isInternalCompleterCompleted;
   }
 
   @visibleForTesting
-  Future<void> waitForTaskToBeDone<S extends Task<T>>({String? taskId}) =>
-      getReference<S>(taskId: taskId)?.inernalCompleterFuture ??
+  String testAsyncTaskIdPivotGeneratorRaw(String taskId) =>
+      _asyncTaskIdPivotRaw(taskId);
+
+  @visibleForTesting
+  Future<void> waitForTaskToBeDone({required String taskId}) =>
+      getAsyncReferenceOf(taskId: taskId)?.inernalCompleterFuture ??
       Future.value(null);
 
-  void _changeState(T newState, Task<T> task) {
+  @protected
+  void mutateState(T newState) {
     _state = newState;
-    _onEventController.add(TaskSuccessEvent<T>(task, _state));
     _onStateChangedController.add(_state);
+  }
+
+  void _passEvent(TaskEvent<T> event) {
+    _onEventController.add(event);
+  }
+
+  void _changeState(T newState, Task<T> task) {
+    mutateState(newState);
+    _passEvent(TaskSuccessEvent<T>(task, newState));
   }
 
   void _onAsyncTaskSuccess(
@@ -75,7 +88,7 @@ abstract class Manager<T> {
     }
     _changeState(potentialState, reference.task);
     reference.completeInternalCompleter();
-    _references.remove(_taskIdPivot(reference.task));
+    _references.remove(_asyncTaskIdPivot(reference.task));
   }
 
   void _onAsyncTaskError(AsyncTaskCompleterReference<T> reference,
@@ -83,15 +96,15 @@ abstract class Manager<T> {
     if (_isReferenceOutDated(reference)) {
       return;
     }
-    _onEventController.add(TaskErrorEvent<T>(reference.task, error, trace));
+    _passEvent(TaskErrorEvent<T>(reference.task, error, trace));
     reference.completeInternalCompleter();
-    _references.remove(_taskIdPivot(reference.task));
+    _references.remove(_asyncTaskIdPivot(reference.task));
   }
 
   Future<void> _handleAsyncTask(AsynchronousTask<T> task) async {
     final stoppedTask = _stopAndReturnReference(task)?.task;
 
-    _onEventController.add(TaskLoadingEvent<T>(task));
+    _passEvent(TaskLoadingEvent<T>(task));
 
     if (stoppedTask is CancelableAsyncTaskMixin<T> &&
         stoppedTask.shouldBeKilled) {
@@ -120,7 +133,7 @@ abstract class Manager<T> {
   Future<void> kill(CancelableAsyncTaskMixin<T> task) async {
     _stopAndReturnReference(task);
     await task.kill();
-    _onEventController.add(TaskKillEvent<T>(task));
+    _passEvent(TaskKillEvent<T>(task));
   }
 
   void dispose() {

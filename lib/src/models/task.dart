@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 
 @immutable
 abstract class Task<T> {
-  String? get id;
+  String get id;
 
   FutureOr<T> run();
 
@@ -25,4 +25,31 @@ abstract class SynchronousTask<T> implements Task<T> {
   T run();
 
   const SynchronousTask();
+}
+
+class GenericSyncTask<T> extends SynchronousTask<T> {
+  final T Function() _runFunction;
+
+  @override
+  final String id;
+
+  @override
+  T run() => _runFunction();
+
+  const GenericSyncTask(
+      {required this.id, required T Function() resultFunction})
+      : _runFunction = resultFunction;
+}
+
+class GenericAsyncTask<T> extends AsynchronousTask<T> {
+  @protected
+  final Future<T> Function() computation;
+
+  @override
+  final String id;
+
+  @override
+  Future<T> run() => computation();
+
+  const GenericAsyncTask({required this.id, required this.computation});
 }

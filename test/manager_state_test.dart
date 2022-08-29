@@ -11,15 +11,15 @@ void main() {
   group('TestManagerStateCountManager\'s state is mutated by synchronous tasks',
       () {
     test(
-        'State is mutated in the given order of the tasks synchronously independent of type or key',
+        'State is mutated in the given order of the tasks synchronously independent of id',
         () {
       final manager = TestManagerStateCountManager(0);
       expectLater(
           manager.onStateChanged, emitsInOrder([1, 2, 4, 7, emitsDone]));
-      manager.incrementSync0();
+      manager.incrementSync0(id: '0');
       manager.incrementSync0(id: '1');
-      manager.incrementSync0(incrementBy: 2);
-      manager.incrementSync1(incrementBy: 3);
+      manager.incrementSync0(id: '0', incrementBy: 2);
+      manager.incrementSync1(id: '0', incrementBy: 3);
       expect(manager.state, 7);
       manager.dispose();
     });
@@ -28,12 +28,11 @@ void main() {
   group(
       'TestManagerStateCountManager\'s state is mutated by asynchronous tasks - ',
       () {
-    test('Value is added by 1 after .incremen()', () async {
+    test('Value is added by 1 after .increment()', () async {
       final manager = TestManagerStateCountManager(0);
-      manager.increment0();
+      manager.increment0(id: '0');
 
-      await manager
-          .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
+      await manager.waitForTaskToBeDone(taskId: '0');
 
       expect(manager.state, 1);
     });
@@ -43,41 +42,48 @@ void main() {
         () {
       final manager = TestManagerStateCountManager(0);
       expectLater(manager.onStateChanged, emits(1));
-      manager.increment0();
+      manager.increment0(id: '0');
     });
 
     test(
-        'Task replications (with the same type and id) must be prevented and must not affect on the state even if they are not killed',
+        'Task replications (with the same id) must be prevented and must not affect on the state even if they are not killed',
         () async {
       final manager = TestManagerStateCountManager(0);
       expectLater(manager.onStateChanged, emitsInOrder([1, 11, emitsDone]));
-      manager.increment0();
-      manager.increment0();
-      manager.increment0();
-      await manager
-          .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
-      manager.increment0(incrementBy: 10);
-      await manager
-          .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
+      manager.increment0(id: '0');
+      manager.increment0(id: '0');
+      manager.increment0(id: '0');
+      await manager.waitForTaskToBeDone(taskId: '0');
+      manager.increment0(incrementBy: 10, id: '0');
+      await manager.waitForTaskToBeDone(taskId: '0');
       expect(manager.state, 11);
       manager.dispose();
     });
 
-    test(
-        'Tasks with the same type will be ommited. Tasks with the same type but different id will run concurrently.',
+    test('Tasks with the same id will be ommited, even if types are different.',
         () async {
       final manager = TestManagerStateCountManager(0);
-      manager.increment0();
-      manager.increment1(incrementBy: 2, delay: const Duration(seconds: 5));
+      manager.increment0(id: '0');
+      manager.increment1(
+          incrementBy: 2, delay: const Duration(seconds: 5), id: '0');
       manager.increment0(id: '2');
-      await manager
-          .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
-      await manager
-          .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask1>();
-      manager.increment0(incrementBy: 11);
-      await manager
-          .waitForTaskToBeDone<TestManagerStateAsyncCountIncrementTask0>();
-      expect(manager.state, 15);
+      await manager.waitForTaskToBeDone(taskId: '0');
+      manager.increment0(incrementBy: 11, id: '0');
+      await manager.waitForTaskToBeDone(taskId: '0');
+      expect(manager.state, 14);
+    });
+
+    test('Tasks that complete with an error will not mutate state', () async {
+      final manager = TestManagerStateCountManager(0);
+      manager.increment0(id: '0');
+      manager.increment1(
+          incrementBy: 2, delay: const Duration(seconds: 5), id: '0');
+      manager.increment0(id: '2');
+      manager.run(TestManagerStateAsyncCounterErrorTask(id: '0'));
+      await manager.waitForTaskToBeDone(taskId: '0');
+      manager.increment0(incrementBy: 11, id: '0');
+      await manager.waitForTaskToBeDone(taskId: '0');
+      expect(manager.state, 12);
     });
   });
 }
