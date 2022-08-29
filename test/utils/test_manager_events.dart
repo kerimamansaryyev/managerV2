@@ -31,3 +31,57 @@ class TestCounterSyncValueTask extends SynchronousTask<int> {
 
   const TestCounterSyncValueTask({required this.id, required this.value});
 }
+
+class TestCounterAsyncValueTask0 extends AsynchronousTask<int> {
+  @override
+  final String id;
+  final int value;
+  final Duration? delay;
+  final bool throwError;
+
+  @override
+  Future<int> run() async {
+    if (delay != null) await Future.delayed(delay!);
+    return value;
+  }
+
+  const TestCounterAsyncValueTask0(
+      {required this.id,
+      required this.value,
+      required this.delay,
+      this.throwError = false});
+}
+
+class TestCounterAsyncValueTask1 extends AsynchronousTask<int> {
+  @override
+  final String id;
+  final int value;
+  final Duration? delay;
+  final bool throwError;
+
+  @override
+  Future<int> run() async {
+    if (delay != null) await Future.delayed(delay!);
+
+    return value;
+  }
+
+  const TestCounterAsyncValueTask1(
+      {required this.id,
+      required this.value,
+      required this.delay,
+      this.throwError = false});
+}
+
+class TestCounterSyncValueTask1 extends SynchronousTask<int> {
+  @override
+  final String id;
+  final int value;
+
+  @override
+  int run() {
+    return value;
+  }
+
+  const TestCounterSyncValueTask1({required this.id, required this.value});
+}

@@ -26,8 +26,10 @@ abstract class Manager<T> {
   Stream<T> get onStateChanged => _onStateChangedController.stream;
   Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
       _onEventController.stream.where((event) =>
+          (taskId == null && S == Task<T>) ||
           (taskId == event.task.id && event.task is S) ||
-          (event.task is S && taskId == null));
+          (taskId == null && event.task is S) ||
+          (taskId == event.task.id && S == Task<T>));
 
   AsyncTaskCompleterReference<T>? _stopAndReturnReference(
       AsynchronousTask<T> task) {
@@ -131,8 +133,10 @@ abstract class Manager<T> {
   }
 
   Future<void> kill(CancelableAsyncTaskMixin<T> task) async {
-    _stopAndReturnReference(task);
-    await task.kill();
+    final stoppedTask =
+        _stopAndReturnReference(task) as CancelableAsyncTaskMixin<T>?;
+    if (stoppedTask == null) return;
+    await stoppedTask.kill();
     _passEvent(TaskKillEvent<T>(task));
   }
 
