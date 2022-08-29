@@ -26,8 +26,8 @@ abstract class Manager<T> {
   Stream<T> get onStateChanged => _onStateChangedController.stream;
   Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
       _onEventController.stream.where((event) =>
-          (taskId == event.task.id && event is S) ||
-          (event is S && taskId == null));
+          (taskId == event.task.id && event.task is S) ||
+          (event.task is S && taskId == null));
 
   AsyncTaskCompleterReference<T>? _stopAndReturnReference(
       AsynchronousTask<T> task) {
@@ -138,5 +138,6 @@ abstract class Manager<T> {
 
   void dispose() {
     _onStateChangedController.close();
+    _onEventController.close();
   }
 }
