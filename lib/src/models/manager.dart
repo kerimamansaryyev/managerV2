@@ -65,17 +65,30 @@ abstract class Manager<T> {
 
   @visibleForTesting
   Future<void> waitForTaskToBeDone({required String taskId}) =>
-      getAsyncReferenceOf(taskId: taskId)?.inernalCompleterFuture ??
+      getAsyncReferenceOf(taskId: taskId)?.internalCompleterFuture ??
       Future.value(null);
 
   @protected
   void mutateState(T newState) {
     _state = newState;
-    _onStateChangedController.add(_state);
+    if (!_onStateChangedController.isClosed) {
+      _onStateChangedController.add(_state);
+    }
+  }
+
+  @protected
+  Future<void> kill(CancelableAsyncTaskMixin<T> task) async {
+    final stoppedTask =
+        _stopAndReturnReference(task)?.task as CancelableAsyncTaskMixin<T>?;
+    if (stoppedTask == null) return;
+    await stoppedTask.kill();
+    _passEvent(TaskKillEvent<T>(task));
   }
 
   void _passEvent(TaskEvent<T> event) {
-    _onEventController.add(event);
+    if (!_onEventController.isClosed) {
+      _onEventController.add(event);
+    }
   }
 
   void _changeState(T newState, Task<T> task) {
@@ -108,8 +121,7 @@ abstract class Manager<T> {
 
     _passEvent(TaskLoadingEvent<T>(task));
 
-    if (stoppedTask is CancelableAsyncTaskMixin<T> &&
-        stoppedTask.shouldBeKilled) {
+    if (stoppedTask is CancelableAsyncTaskMixin<T>) {
       await stoppedTask.kill();
     }
 
@@ -132,12 +144,11 @@ abstract class Manager<T> {
     }
   }
 
-  Future<void> kill(CancelableAsyncTaskMixin<T> task) async {
-    final stoppedTask =
-        _stopAndReturnReference(task) as CancelableAsyncTaskMixin<T>?;
-    if (stoppedTask == null) return;
-    await stoppedTask.kill();
-    _passEvent(TaskKillEvent<T>(task));
+  Future<void> killById({required String taskId}) async {
+    final reference = _references[_asyncTaskIdPivotRaw(taskId)];
+    final task = reference?.task;
+    if (task is! CancelableAsyncTaskMixin<T>) return;
+    return kill(task);
   }
 
   void dispose() {

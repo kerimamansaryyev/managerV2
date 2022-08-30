@@ -1,13 +1,14 @@
 import 'package:manager/src/models/task_event.dart';
+import 'package:manager/src/utils/stream_extensions.dart';
 
 extension TaskEventStreamExtension<T> on Stream<TaskEvent<T>> {
-  Stream<TaskEvent<T>> loading() =>
-      where((event) => event is TaskLoadingEvent<T>);
+  Stream<TaskLoadingEvent<T>> loading() =>
+      whereTypeFilter<TaskLoadingEvent<T>>();
 
-  Stream<TaskEvent<T>> success() =>
-      where((event) => event is TaskSuccessEvent<T>);
+  Stream<TaskSuccessEvent<T>> success() =>
+      whereTypeFilter<TaskSuccessEvent<T>>();
 
-  Stream<TaskEvent<T>> failed() => where((event) => event is TaskErrorEvent<T>);
+  Stream<TaskErrorEvent<T>> failed() => whereTypeFilter<TaskErrorEvent<T>>();
 
-  Stream<TaskEvent<T>> killed() => where((event) => event is TaskKillEvent<T>);
+  Stream<TaskKillEvent<T>> killed() => whereTypeFilter<TaskKillEvent<T>>();
 }

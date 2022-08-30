@@ -1,3 +1,5 @@
+import 'package:manager/src/models/stream_extensions.dart';
+import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:test/test.dart';
 import 'utils/test_manager_events.dart' as event_utils;
@@ -46,8 +48,98 @@ void main() {
       manager.run(event_utils.TestCounterAsyncValueTask0(
           id: 'one', value: 2, delay: const Duration(seconds: 2)));
     });
+
+    test(
+        'Nested call of an event with the same id will dismiss itself from mutating the state and prevent the further success event',
+        () async {
+      final manager = event_utils.TestCountManager(0);
+      final firstLevelEmitValue = 3;
+      final secondLevelEmitValue = 2;
+      expectLater(manager.onStateChanged, neverEmits(firstLevelEmitValue));
+      expectLater(
+          manager.on().map((event) => '${event.runtimeType}_${event.task.id}'),
+          emitsInOrder([
+            '${TaskLoadingEvent<int>}_one',
+            '${TaskLoadingEvent<int>}_one',
+            '${TaskSuccessEvent<int>}_one',
+          ]));
+      manager.run(event_utils.TestCounterAsyncGenericTask(
+          id: 'one',
+          runFunction: () async {
+            await Future.delayed(const Duration(seconds: 2));
+            manager.run(event_utils.TestCounterAsyncGenericTask(
+                runFunction: () async {
+                  await Future.delayed(const Duration(seconds: 2));
+                  return secondLevelEmitValue;
+                },
+                id: 'one'));
+            return firstLevelEmitValue;
+          }));
+      await Future.delayed(const Duration(seconds: 5));
+      manager.dispose();
+    });
   });
   group('Testing .on method - ', () {
+    test('Stream extensions must give events respective to their semantics',
+        () async {
+      final manager = event_utils.TestCountManager(0);
+      const standartSecondsDelay = 2;
+
+      expectLater(
+          manager.on().loading().map((event) => event.task.id),
+          emitsInOrder([
+            'one',
+            'two',
+            'throwingError1',
+            'throwingError2',
+            'killed1',
+            'killed2',
+            emitsDone
+          ]));
+
+      expectLater(manager.on().success().map((event) => event.task.id),
+          emitsInOrder(['one', 'two', emitsDone]));
+      expectLater(manager.on().failed().map((event) => event.task.id),
+          emitsInOrder(['throwingError1', 'throwingError2', emitsDone]));
+      expectLater(manager.on().killed().map((event) => event.task.id),
+          emitsInOrder(['killed1', 'killed2', emitsDone]));
+
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'one',
+          value: 2,
+          delay: const Duration(seconds: standartSecondsDelay)));
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'two',
+          value: 2,
+          delay: const Duration(seconds: standartSecondsDelay)));
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'throwingError1',
+          throwError: true,
+          value: 2,
+          delay: const Duration(seconds: standartSecondsDelay)));
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'throwingError2',
+          throwError: true,
+          value: 2,
+          delay: const Duration(seconds: standartSecondsDelay)));
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'killed1',
+          value: 2,
+          delay: const Duration(seconds: standartSecondsDelay)));
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'killed2',
+          value: 2,
+          delay: const Duration(seconds: standartSecondsDelay)));
+
+      await Future.delayed(const Duration(seconds: 1));
+      await manager.killById(taskId: 'killed1');
+      await manager.killById(taskId: 'killed2');
+      await Future.delayed(const Duration(
+        seconds: standartSecondsDelay + 1,
+      ));
+      manager.dispose();
+    });
+
     test('Stream must give all events if neither the type parameter nor id set',
         () {
       final manager = event_utils.TestCountManager(0);
@@ -70,6 +162,22 @@ void main() {
               .where((event) => event is TaskSuccessEvent)
               .map((event) => event.task.id),
           emitsInOrder(['one', 'two', emitsDone]));
+      manager.run(event_utils.TestCounterSyncValueTask(id: 'one', value: 2));
+      manager.run(event_utils.TestCounterSyncValueTask(id: 'two', value: 2));
+      manager.run(event_utils.TestCounterSyncValueTask1(id: 'three', value: 2));
+      manager.dispose();
+    });
+
+    test(
+        'Stream must give all events of provided generic type or super type independent of id',
+        () {
+      final manager = event_utils.TestCountManager(0);
+      expectLater(
+          manager
+              .on<SynchronousTask<int>>()
+              .where((event) => event is TaskSuccessEvent)
+              .map((event) => event.task.id),
+          emitsInOrder(['one', 'two', 'three', emitsDone]));
       manager.run(event_utils.TestCounterSyncValueTask(id: 'one', value: 2));
       manager.run(event_utils.TestCounterSyncValueTask(id: 'two', value: 2));
       manager.run(event_utils.TestCounterSyncValueTask1(id: 'three', value: 2));

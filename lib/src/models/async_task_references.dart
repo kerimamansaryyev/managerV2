@@ -10,11 +10,18 @@ class AsyncTaskCompleterReference<T> {
   @protected
   final Completer<void> completer;
 
-  Future<void> get inernalCompleterFuture => completer.future;
+  @internal
+  Future<void> get internalCompleterFuture => completer.future;
 
+  @internal
+  bool get isInternalCompleterCompleted => completer.isCompleted;
+
+  @internal
   void completeInternalCompleter() => completer.complete();
 
-  bool get isInternalCompleterCompleted => completer.isCompleted;
+  bool get isCompleted => isInternalCompleterCompleted;
+
+  Future<void> get future => internalCompleterFuture;
 
   const AsyncTaskCompleterReference._(
       {required this.completer, required this.task});

@@ -17,6 +17,10 @@ abstract class AsynchronousTask<T> implements Task<T> {
   Future<T> run();
 
   const AsynchronousTask();
+
+  const factory AsynchronousTask.generic(
+      {required String id,
+      required Future<T> Function() computation}) = GenericAsyncTask;
 }
 
 @immutable
@@ -25,20 +29,21 @@ abstract class SynchronousTask<T> implements Task<T> {
   T run();
 
   const SynchronousTask();
+
+  const factory SynchronousTask.generic(
+      {required String id, required T result}) = GenericSyncTask;
 }
 
 class GenericSyncTask<T> extends SynchronousTask<T> {
-  final T Function() _runFunction;
+  final T result;
 
   @override
   final String id;
 
   @override
-  T run() => _runFunction();
+  T run() => result;
 
-  const GenericSyncTask(
-      {required this.id, required T Function() resultFunction})
-      : _runFunction = resultFunction;
+  const GenericSyncTask({required this.id, required this.result});
 }
 
 class GenericAsyncTask<T> extends AsynchronousTask<T> {
