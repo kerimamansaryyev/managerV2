@@ -3,6 +3,20 @@ import 'dart:async';
 import 'package:manager/src/models/manager.dart';
 import 'package:manager/src/models/task.dart';
 
+class TestCounterConditionedManager extends Manager<int> {
+  TestCounterConditionedManager(
+      super.initialValue, this.mutateDecisionPredicate);
+
+  final bool Function(int newState) mutateDecisionPredicate;
+
+  @override
+  void mutateState(int newState) {
+    if (mutateDecisionPredicate(newState)) {
+      super.mutateState(newState);
+    }
+  }
+}
+
 class TestManagerStateCountManager extends Manager<int> {
   TestManagerStateCountManager(super.initialValue) : super();
 

@@ -1,3 +1,4 @@
+import 'package:manager/src/models/task.dart';
 import 'package:test/test.dart';
 
 import 'utils/test_count_manager_state.dart';
@@ -85,5 +86,20 @@ void main() {
       await manager.waitForTaskToBeDone(taskId: '0');
       expect(manager.state, 12);
     });
+  });
+
+  test(
+      'When mutateState is overriden - success tasks will still fire but the state may not be changed',
+      () {
+    final manager =
+        TestCounterConditionedManager(0, (newState) => newState > 1);
+    expectLater(manager.onStateChanged, emitsInOrder([2, 3, emitsDone]));
+    manager.run(SynchronousTask.generic(id: 'one', result: 1));
+    expect(manager.state, 0);
+    manager.run(SynchronousTask.generic(id: 'one', result: 2));
+    manager.run(SynchronousTask.generic(id: 'one', result: 3));
+    manager.run(SynchronousTask.generic(id: 'one', result: 1));
+    expect(manager.state, 3);
+    manager.dispose();
   });
 }
