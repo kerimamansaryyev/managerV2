@@ -5,7 +5,14 @@ import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_mixins.dart';
 
 class TestCountManager extends Manager<int> {
-  TestCountManager(super.initialValue);
+  final void Function()? onEventCallbackFunction;
+
+  @override
+  void onEventCallback(_) {
+    onEventCallbackFunction?.call();
+  }
+
+  TestCountManager(super.initialValue, {this.onEventCallbackFunction});
 }
 
 class TestCounterSyncValueTask extends SynchronousTask<int> {

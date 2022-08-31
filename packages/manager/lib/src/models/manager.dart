@@ -22,8 +22,6 @@ abstract class Manager<T> {
   Manager(T initialValue) : _state = initialValue;
 
   T get state => _state;
-  String _asyncTaskIdPivot(AsynchronousTask<T> task) => task.id;
-  String _asyncTaskIdPivotRaw(String taskId) => taskId;
   Stream<T> get onStateChanged => _onStateChangedController.stream;
   Stream<void> get onUpdated =>
       StreamGroup.mergeBroadcast([on(), onStateChanged]).map((event) {
@@ -38,7 +36,7 @@ abstract class Manager<T> {
 
   AsyncTaskCompleterReference<T>? _stopAndReturnReference(
       AsynchronousTask<T> task) {
-    final reference = _references[_asyncTaskIdPivot(task)];
+    final reference = _references[safelyGetTaskIdFromTask(task)];
 
     if (reference == null) return null;
 
@@ -46,33 +44,40 @@ abstract class Manager<T> {
       return null;
     }
 
-    _references.remove(_asyncTaskIdPivot(task));
+    _references.remove(safelyGetTaskIdFromTask(task));
 
     return reference..completeInternalCompleter();
   }
 
   AsyncTaskCompleterReference<T> _createReferenceOf(AsynchronousTask<T> task) {
-    return _references[_asyncTaskIdPivot(task)] =
+    return _references[safelyGetTaskIdFromTask(task)] =
         AsyncTaskCompleterReference<T>.create(task);
   }
 
   AsyncTaskCompleterReference<T>? getAsyncReferenceOf(
           {required String taskId}) =>
-      _references[_asyncTaskIdPivotRaw(taskId)];
+      _references[safelyExtractTaskIdFromString(taskId)];
 
   bool _isReferenceOutDated(AsyncTaskCompleterReference<T> previous) {
     return previous.isInternalCompleterCompleted;
   }
 
+  @protected
+  String safelyGetTaskIdFromTask(Task<T> task) => task.id;
+
+  @protected
+  String safelyExtractTaskIdFromString(String taskId) => taskId;
+
   @visibleForTesting
   String testAsyncTaskIdPivotGeneratorRaw(String taskId) =>
-      _asyncTaskIdPivotRaw(taskId);
+      safelyExtractTaskIdFromString(taskId);
 
   @visibleForTesting
   Future<void> waitForTaskToBeDone({required String taskId}) =>
       getAsyncReferenceOf(taskId: taskId)?.internalCompleterFuture ??
       Future.value(null);
 
+  @mustCallSuper
   @protected
   void mutateState(T newState) {
     _state = newState;
@@ -90,15 +95,19 @@ abstract class Manager<T> {
     _passEvent(TaskKillEvent<T>(task));
   }
 
+  @protected
+  void onEventCallback(TaskEvent<T> event) {}
+
   void _passEvent(TaskEvent<T> event) {
     if (!_onEventController.isClosed) {
       _onEventController.add(event);
+      onEventCallback(event);
     }
   }
 
   void _changeState(T newState, Task<T> task) {
     mutateState(newState);
-    _passEvent(TaskSuccessEvent<T>(task, newState));
+    _passEvent(TaskSuccessEvent<T>(task, _state));
   }
 
   void _onAsyncTaskSuccess(
@@ -108,7 +117,7 @@ abstract class Manager<T> {
     }
     _changeState(potentialState, reference.task);
     reference.completeInternalCompleter();
-    _references.remove(_asyncTaskIdPivot(reference.task));
+    _references.remove(safelyGetTaskIdFromTask(reference.task));
   }
 
   void _onAsyncTaskError(AsyncTaskCompleterReference<T> reference,
@@ -118,7 +127,7 @@ abstract class Manager<T> {
     }
     _passEvent(TaskErrorEvent<T>(reference.task, error, trace));
     reference.completeInternalCompleter();
-    _references.remove(_asyncTaskIdPivot(reference.task));
+    _references.remove(safelyGetTaskIdFromTask(reference.task));
   }
 
   Future<void> _handleAsyncTask(AsynchronousTask<T> task) async {
@@ -150,7 +159,7 @@ abstract class Manager<T> {
   }
 
   Future<void> killById({required String taskId}) async {
-    final reference = _references[_asyncTaskIdPivotRaw(taskId)];
+    final reference = _references[safelyExtractTaskIdFromString(taskId)];
     final task = reference?.task;
     if (task is! CancelableAsyncTaskMixin<T>) return;
     return kill(task);

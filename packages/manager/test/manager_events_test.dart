@@ -5,6 +5,16 @@ import 'package:test/test.dart';
 import 'utils/test_manager_events.dart' as event_utils;
 
 void main() {
+  test('Ensuring .onEventCallback is fired', () async {
+    var eventCount = 0;
+    final manager = event_utils.TestCountManager(0,
+        onEventCallbackFunction: () => eventCount++);
+    manager.run(event_utils.TestCounterAsyncValueTask0(
+        id: 'one', value: 2, delay: const Duration(seconds: 2)));
+    await manager.waitForTaskToBeDone(taskId: 'one');
+    expect(eventCount, 2);
+  });
+
   test('onUpdate must be fired whenever an event occurs or state is changed',
       () async {
     final manager = event_utils.TestCountManager(0);
