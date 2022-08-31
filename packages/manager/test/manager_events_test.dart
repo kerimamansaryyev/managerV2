@@ -5,6 +5,20 @@ import 'package:test/test.dart';
 import 'utils/test_manager_events.dart' as event_utils;
 
 void main() {
+  test('onUpdate must be fired whenever an event occurs or state is changed',
+      () async {
+    final manager = event_utils.TestCountManager(0);
+    int eventCount = 0;
+    expectLater(manager.onUpdated, emitsThrough(emitsDone));
+    manager.onUpdated.listen((event) {
+      eventCount++;
+    });
+    manager.run(event_utils.TestCounterAsyncValueTask0(
+        id: 'one', value: 2, delay: const Duration(seconds: 2)));
+    await manager.waitForTaskToBeDone(taskId: 'one');
+    manager.dispose();
+    expect(eventCount, 3);
+  });
   group('Testing asynchronous tasks - ', () {
     test('Events with a different id are executed concurrently', () async {
       final manager = event_utils.TestCountManager(0);

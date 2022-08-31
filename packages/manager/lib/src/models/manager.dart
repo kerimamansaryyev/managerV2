@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:manager/src/models/async_task_references.dart';
 import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_event.dart';
@@ -24,6 +25,10 @@ abstract class Manager<T> {
   String _asyncTaskIdPivot(AsynchronousTask<T> task) => task.id;
   String _asyncTaskIdPivotRaw(String taskId) => taskId;
   Stream<T> get onStateChanged => _onStateChangedController.stream;
+  Stream<void> get onUpdated =>
+      StreamGroup.mergeBroadcast([on(), onStateChanged]).map((event) {
+        return;
+      });
   Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
       _onEventController.stream.where((event) =>
           (taskId == null && S == Task<T>) ||
