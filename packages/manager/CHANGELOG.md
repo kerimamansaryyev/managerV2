@@ -1,3 +1,6 @@
+## 0.0.3
+
+Added `RecordTaskEventsMixin` to enable recording of events. 
 ## 0.0.2+1
 
 Downgraded `async` dependency to be compatible with flutter
