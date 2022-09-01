@@ -1,3 +1,7 @@
+## 0.0.4
+
+* Updated `manager` dependency
+* Fixed the repository link
 ## 0.0.3
 
 * Configured the exports
