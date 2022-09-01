@@ -1,0 +1,6 @@
+library manager_provider_internal;
+
+export 'utils/selector_interfaces.dart';
+export 'manager_consumer.dart';
+export 'manager_provider.dart';
+export 'manager_selector.dart';
