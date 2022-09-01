@@ -252,6 +252,21 @@ void main() {
       manager.run(event_utils.TestCounterSyncValueTask1(id: 'three', value: 2));
       manager.dispose();
     });
+
+    test(
+        'Stream will not fire the kill event if a task does not exist or was killed once',
+        () async {
+      final manager = event_utils.TestCountManager(0);
+      expectLater(manager.on().map((event) => event.runtimeType),
+          emitsInOrder([TaskLoadingEvent<int>, TaskKillEvent<int>, emitsDone]));
+      const standartSecondsDelay = Duration(seconds: 1);
+      manager.run(event_utils.TestCounterAsyncValueTask0(
+          id: 'killed1', value: 2, delay: standartSecondsDelay));
+      await manager.killById(taskId: 'killed1');
+      await manager.killById(taskId: 'killed1');
+      await manager.killById(taskId: 'killed1');
+      manager.dispose();
+    });
   });
 
   group('Testing synchronous tasks - ', () {
