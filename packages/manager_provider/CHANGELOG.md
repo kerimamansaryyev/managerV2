@@ -1,4 +1,4 @@
-## 0.0.1
+## 0.0.2
 
 * Added the `repository` to `pubspec.yaml`
 ## 0.0.1
