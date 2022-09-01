@@ -1,8 +1,8 @@
 name: manager
 description: A new state management architecture pattern.
-version: 0.0.3
+version: 0.0.4
 
-repository: https://github.com/mcfugger/managerV2/packages/manager
+repository: https://github.com/mcfugger/managerV2/tree/master/packages/manager
 
 environment:
   sdk: '>=2.17.1 <3.0.0'

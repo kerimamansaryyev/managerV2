@@ -1,3 +1,6 @@
+## 0.0.4
+
+Fixed repository link in `pubscpec.yaml`
 ## 0.0.3
 
 Added `RecordTaskEventsMixin` to enable recording of events. 
