@@ -2,6 +2,8 @@ name: manager_provider
 description: A provider wrapper and set of the widgets to use with manager package.
 version: 0.0.1
 
+repository: https://github.com/mcfugger/managerV2/packages/manager
+
 environment:
   sdk: ">=2.17.1 <3.0.0"
   flutter: ">=1.17.0"
