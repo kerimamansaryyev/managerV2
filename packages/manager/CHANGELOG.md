@@ -3,10 +3,10 @@
 Added following methods to `RecordTaskEventsMixin`:
 * `recordEvent`
 * `deleteRecordEvent`
+* `eventTable` (exposing it as `protected` member)
 
 Behaviour of instances extending `RecordTaskEventsMixin` was overriden:
 Record of the event being killed - will be immediately removed from `_eventTable`
-
 ## 0.0.4
 
 Fixed repository link in `pubscpec.yaml`

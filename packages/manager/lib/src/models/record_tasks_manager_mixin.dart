@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:manager/src/models/manager.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:meta/meta.dart';
@@ -7,6 +9,10 @@ mixin RecordTaskEventsMixin<T> on Manager<T> {
 
   TaskEvent<T>? getRecordedEvent({required String taskId}) =>
       _eventTable[safelyExtractTaskIdFromString(taskId)];
+
+  @protected
+  Map<String, TaskEvent<T>> get eventTable =>
+      UnmodifiableMapView({..._eventTable});
 
   @mustCallSuper
   @protected
