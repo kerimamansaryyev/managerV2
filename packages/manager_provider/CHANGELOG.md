@@ -1,3 +1,6 @@
+## 0.0.5
+
+Exposing the latest version of `manager`
 ## 0.0.4
 
 * Updated `manager` dependency
