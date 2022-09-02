@@ -1,3 +1,12 @@
+## 0.0.5
+
+Added following methods to `RecordTaskEventsMixin`:
+* `recordEvent`
+* `deleteRecordEvent`
+
+Behaviour of instances extending `RecordTaskEventsMixin` was overriden:
+Record of the event being killed - will be immediately removed from `_eventTable`
+
 ## 0.0.4
 
 Fixed repository link in `pubscpec.yaml`

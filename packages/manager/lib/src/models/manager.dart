@@ -86,6 +86,7 @@ abstract class Manager<T> {
     }
   }
 
+  @mustCallSuper
   @protected
   Future<void> kill(CancelableAsyncTaskMixin<T> task) async {
     final stoppedTask =
@@ -150,6 +151,7 @@ abstract class Manager<T> {
     _changeState((task).run(), task);
   }
 
+  @mustCallSuper
   void run(Task<T> task) {
     if (task is AsynchronousTask<T>) {
       _handleAsyncTask(task);
@@ -158,6 +160,7 @@ abstract class Manager<T> {
     }
   }
 
+  @mustCallSuper
   Future<void> killById({required String taskId}) async {
     final reference = _references[safelyExtractTaskIdFromString(taskId)];
     final task = reference?.task;
@@ -165,6 +168,7 @@ abstract class Manager<T> {
     return kill(task);
   }
 
+  @mustCallSuper
   void dispose() {
     _onStateChangedController.close();
     _onEventController.close();
