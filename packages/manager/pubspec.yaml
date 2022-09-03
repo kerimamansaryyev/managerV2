@@ -1,6 +1,6 @@
 name: manager
 description: A new state management architecture pattern.
-version: 0.0.5
+version: 0.0.6
 
 repository: https://github.com/mcfugger/managerV2/tree/master/packages/manager
 
