@@ -1,3 +1,3 @@
 library manager;
 
-export 'src/manager_exports.dart';
+export 'manager_exports.dart';

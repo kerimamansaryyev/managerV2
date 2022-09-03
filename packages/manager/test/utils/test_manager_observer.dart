@@ -1,5 +1,5 @@
 import 'package:manager/src/models/manager.dart';
-import 'package:manager/src/models/observable_manager.dart';
+import 'package:manager/src/models/observable_manager_mixin.dart';
 import 'package:manager/src/models/observer.dart';
 
 class TestObserver0 extends ManagerObserver<int> {

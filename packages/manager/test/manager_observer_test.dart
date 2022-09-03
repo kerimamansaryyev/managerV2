@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 import 'utils/test_manager_observer.dart' as test_manager_observer;
 
 void main() {
-  test('Manager observer initializes observers adding them to the list', () {
+  test('Observable manager initializes observers adding them to the list', () {
     final manager = test_manager_observer.TestCounterManager(0);
     expect(manager.observers.length, 0);
     manager.addObserverTest(test_manager_observer.TestCounterManager.observer0);

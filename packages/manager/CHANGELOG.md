@@ -1,3 +1,7 @@
+## 0.0.6
+* Added new structures: `ObservableManagerMixin` and `ManagerObserver`
+* Added new tests for the structures in `manager_observer_test`
+* Regrouped the library structure
 ## 0.0.5
 
 Added following methods to `RecordTaskEventsMixin`:
