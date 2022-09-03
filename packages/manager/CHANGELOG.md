@@ -1,3 +1,5 @@
+## 0.0.7
+Fixed an issue of mixins overriding methods of each other without calling `super`
 ## 0.0.6
 * Added new structures: `ObservableManagerMixin` and `ManagerObserver`
 * Added new tests for the structures in `manager_observer_test`

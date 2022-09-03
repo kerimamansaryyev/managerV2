@@ -96,6 +96,7 @@ abstract class Manager<T> {
     _passEvent(TaskKillEvent<T>(task));
   }
 
+  @mustCallSuper
   @protected
   void onEventCallback(TaskEvent<T> event) {}
 

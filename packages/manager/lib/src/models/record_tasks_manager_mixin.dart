@@ -37,5 +37,6 @@ mixin RecordTaskEventsMixin<T> on Manager<T> {
   @override
   void onEventCallback(TaskEvent<T> event) {
     recordEvent(event);
+    super.onEventCallback(event);
   }
 }

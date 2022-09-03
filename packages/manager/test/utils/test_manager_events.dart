@@ -10,6 +10,7 @@ class TestCountManager extends Manager<int> {
   @override
   void onEventCallback(_) {
     onEventCallbackFunction?.call();
+    super.onEventCallback(_);
   }
 
   TestCountManager(super.initialValue, {this.onEventCallbackFunction});
