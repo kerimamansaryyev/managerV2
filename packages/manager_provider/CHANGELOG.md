@@ -1,3 +1,6 @@
+## 0.0.6
+
+Syncing with the new structures of `manager`
 ## 0.0.5
 
 Exposing the latest version of `manager`
