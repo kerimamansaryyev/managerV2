@@ -1,3 +1,8 @@
+## 0.0.7
+
+Syncing with the new structures of `manager`:
+Fixed an issue of mixins overriding the methods of the class without callingl
+`super`
 ## 0.0.6
 
 Syncing with the new structures of `manager`
