@@ -30,8 +30,10 @@ abstract class Manager<T> {
       StreamGroup.mergeBroadcast([on(), onStateChanged]).map((event) {
         return;
       });
-  Stream<TaskEvent<T>> on<S extends Task<T>>(
-          {String? taskId, bool withLatest = false}) =>
+  Stream<TaskEvent<T>> on<S extends Task<T>>({
+    String? taskId,
+    bool withLatest = false,
+  }) =>
       _decideOnEventControllerStream(withLatest).where(
         (event) =>
             (taskId == null && S == Task<T>) ||
