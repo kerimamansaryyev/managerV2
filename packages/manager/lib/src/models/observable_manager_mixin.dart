@@ -20,9 +20,8 @@ mixin ObservableManagerMixin<T> on Manager<T> {
   }
 
   @visibleForTesting
-  void initializeTest() => initialize();
+  void initializeTest() => initializeObservers();
 
-  @protected
   void addObserver(ManagerObserver<T> observer) {
     _observers.add(observer);
   }
@@ -41,9 +40,19 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     super.onEventCallback(event);
   }
 
+  @Deprecated(
+    'The method was renamed to initializeObservers and will be removed in major releases',
+  )
   @mustCallSuper
   @protected
   void initialize() {
+    for (var observer in _observers) {
+      observer.onCreated(this);
+    }
+  }
+
+  @protected
+  void initializeObservers() {
     for (var observer in _observers) {
       observer.onCreated(this);
     }
