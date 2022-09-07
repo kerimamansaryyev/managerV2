@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:manager/src/models/task.dart';
 import 'package:test/test.dart';
 
 import 'utils/test_count_manager_state.dart';
 
+/// It's okay to ignore the rule for tests
+// ignore: long-method
 void main() {
   test('State is 0 by default', () {
     final manager = TestManagerStateCountManager(0);
@@ -16,7 +20,9 @@ void main() {
         () {
       final manager = TestManagerStateCountManager(0);
       expectLater(
-          manager.onStateChanged, emitsInOrder([1, 2, 4, 7, emitsDone]));
+        manager.onStateChanged,
+        emitsInOrder([1, 2, 4, 7, emitsDone]),
+      );
       manager.incrementSync0(id: '0');
       manager.incrementSync0(id: '1');
       manager.incrementSync0(id: '0', incrementBy: 2);
@@ -50,7 +56,12 @@ void main() {
         'Task replications (with the same id) must be prevented and must not affect on the state even if they are not killed',
         () async {
       final manager = TestManagerStateCountManager(0);
-      expectLater(manager.onStateChanged, emitsInOrder([1, 11, emitsDone]));
+      unawaited(
+        expectLater(
+          manager.onStateChanged,
+          emitsInOrder([1, 11, emitsDone]),
+        ),
+      );
       manager.increment0(id: '0');
       manager.increment0(id: '0');
       manager.increment0(id: '0');
@@ -66,7 +77,10 @@ void main() {
       final manager = TestManagerStateCountManager(0);
       manager.increment0(id: '0');
       manager.increment1(
-          incrementBy: 2, delay: const Duration(seconds: 5), id: '0');
+        incrementBy: 2,
+        delay: const Duration(seconds: 5),
+        id: '0',
+      );
       manager.increment0(id: '2');
       await manager.waitForTaskToBeDone(taskId: '0');
       manager.increment0(incrementBy: 11, id: '0');
@@ -78,7 +92,10 @@ void main() {
       final manager = TestManagerStateCountManager(0);
       manager.increment0(id: '0');
       manager.increment1(
-          incrementBy: 2, delay: const Duration(seconds: 5), id: '0');
+        incrementBy: 2,
+        delay: const Duration(seconds: 5),
+        id: '0',
+      );
       manager.increment0(id: '2');
       manager.run(TestManagerStateAsyncCounterErrorTask(id: '0'));
       await manager.waitForTaskToBeDone(taskId: '0');

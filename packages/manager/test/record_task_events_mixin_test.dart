@@ -14,12 +14,20 @@ void main() {
       'Must give recorded events as recorded through mixin\'s .onEventCallback',
       () async {
     final manager = TestRecordableCounterManager(0);
-    manager.run(AsynchronousTask.generic(
-        id: 'one', computation: () => Future.value(2)));
-    expect(manager.getRecordedEvent(taskId: 'one').runtimeType,
-        TaskLoadingEvent<int>);
+    manager.run(
+      AsynchronousTask.generic(
+        id: 'one',
+        computation: () => Future.value(2),
+      ),
+    );
+    expect(
+      manager.getRecordedEvent(taskId: 'one').runtimeType,
+      TaskLoadingEvent<int>,
+    );
     await manager.waitForTaskToBeDone(taskId: 'one');
-    expect(manager.getRecordedEvent(taskId: 'one').runtimeType,
-        TaskSuccessEvent<int>);
+    expect(
+      manager.getRecordedEvent(taskId: 'one').runtimeType,
+      TaskSuccessEvent<int>,
+    );
   });
 }

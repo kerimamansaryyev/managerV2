@@ -28,45 +28,42 @@ abstract class Manager<T> {
         return;
       });
   Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
-      _onEventController.stream.where((event) =>
-          (taskId == null && S == Task<T>) ||
-          (taskId == event.task.id && event.task is S) ||
-          (taskId == null && event.task is S) ||
-          (taskId == event.task.id && S == Task<T>));
-
-  AsyncTaskCompleterReference<T>? _stopAndReturnReference(
-      AsynchronousTask<T> task) {
-    final reference = _references[safelyGetTaskIdFromTask(task)];
-
-    if (reference == null) return null;
-
-    if (reference.isInternalCompleterCompleted) {
-      return null;
-    }
-
-    _references.remove(safelyGetTaskIdFromTask(task));
-
-    return reference..completeInternalCompleter();
-  }
-
-  AsyncTaskCompleterReference<T> _createReferenceOf(AsynchronousTask<T> task) {
-    return _references[safelyGetTaskIdFromTask(task)] =
-        AsyncTaskCompleterReference<T>.create(task);
-  }
-
-  AsyncTaskCompleterReference<T>? getAsyncReferenceOf(
-          {required String taskId}) =>
+      _onEventController.stream.where(
+        (event) =>
+            (taskId == null && S == Task<T>) ||
+            (taskId == event.task.id && event.task is S) ||
+            (taskId == null && event.task is S) ||
+            (taskId == event.task.id && S == Task<T>),
+      );
+  AsyncTaskCompleterReference<T>? getAsyncReferenceOf({
+    required String taskId,
+  }) =>
       _references[safelyExtractTaskIdFromString(taskId)];
 
-  bool _isReferenceOutDated(AsyncTaskCompleterReference<T> previous) {
-    return previous.isInternalCompleterCompleted;
+  @mustCallSuper
+  void run(Task<T> task) {
+    if (task is AsynchronousTask<T>) {
+      _handleAsyncTask(task);
+    } else if (task is SynchronousTask<T>) {
+      _handleSyncTask(task);
+    }
   }
 
-  @protected
-  String safelyGetTaskIdFromTask(Task<T> task) => task.id;
+  @mustCallSuper
+  Future<void> killById({required String taskId}) async {
+    final reference = _references[safelyExtractTaskIdFromString(taskId)];
+    final task = reference?.task;
+    if (task is! CancelableAsyncTaskMixin<T>) {
+      return;
+    }
+    return kill(task);
+  }
 
-  @protected
-  String safelyExtractTaskIdFromString(String taskId) => taskId;
+  @mustCallSuper
+  void dispose() {
+    _onStateChangedController.close();
+    _onEventController.close();
+  }
 
   @visibleForTesting
   String testAsyncTaskIdPivotGeneratorRaw(String taskId) =>
@@ -88,17 +85,52 @@ abstract class Manager<T> {
 
   @mustCallSuper
   @protected
+  void onEventCallback(TaskEvent<T> event) {}
+
+  @mustCallSuper
+  @protected
   Future<void> kill(CancelableAsyncTaskMixin<T> task) async {
     final stoppedTask =
         _stopAndReturnReference(task)?.task as CancelableAsyncTaskMixin<T>?;
-    if (stoppedTask == null) return;
+    if (stoppedTask == null) {
+      return;
+    }
     await stoppedTask.kill();
     _passEvent(TaskKillEvent<T>(task));
   }
 
-  @mustCallSuper
   @protected
-  void onEventCallback(TaskEvent<T> event) {}
+  String safelyGetTaskIdFromTask(Task<T> task) => task.id;
+
+  @protected
+  String safelyExtractTaskIdFromString(String taskId) => taskId;
+
+  AsyncTaskCompleterReference<T>? _stopAndReturnReference(
+    AsynchronousTask<T> task,
+  ) {
+    final reference = _references[safelyGetTaskIdFromTask(task)];
+
+    if (reference == null) {
+      return null;
+    }
+
+    if (reference.isInternalCompleterCompleted) {
+      return null;
+    }
+
+    _references.remove(safelyGetTaskIdFromTask(task));
+
+    return reference..completeInternalCompleter();
+  }
+
+  AsyncTaskCompleterReference<T> _createReferenceOf(AsynchronousTask<T> task) {
+    return _references[safelyGetTaskIdFromTask(task)] =
+        AsyncTaskCompleterReference<T>.create(task);
+  }
+
+  bool _isReferenceOutDated(AsyncTaskCompleterReference<T> previous) {
+    return previous.isInternalCompleterCompleted;
+  }
 
   void _passEvent(TaskEvent<T> event) {
     if (!_onEventController.isClosed) {
@@ -113,7 +145,9 @@ abstract class Manager<T> {
   }
 
   void _onAsyncTaskSuccess(
-      T potentialState, AsyncTaskCompleterReference<T> reference) {
+    T potentialState,
+    AsyncTaskCompleterReference<T> reference,
+  ) {
     if (_isReferenceOutDated(reference)) {
       return;
     }
@@ -122,8 +156,11 @@ abstract class Manager<T> {
     _references.remove(safelyGetTaskIdFromTask(reference.task));
   }
 
-  void _onAsyncTaskError(AsyncTaskCompleterReference<T> reference,
-      dynamic error, StackTrace? trace) {
+  void _onAsyncTaskError(
+    AsyncTaskCompleterReference<T> reference,
+    dynamic error,
+    StackTrace? trace,
+  ) {
     if (_isReferenceOutDated(reference)) {
       return;
     }
@@ -143,35 +180,16 @@ abstract class Manager<T> {
 
     final newTaskReference = _createReferenceOf(task);
 
-    task.run().then((value) => _onAsyncTaskSuccess(value, newTaskReference),
-        onError: (error, stackTrace) =>
-            _onAsyncTaskError(newTaskReference, error, stackTrace));
+    unawaited(
+      task.run().then(
+            (value) => _onAsyncTaskSuccess(value, newTaskReference),
+            onError: (error, stackTrace) =>
+                _onAsyncTaskError(newTaskReference, error, stackTrace),
+          ),
+    );
   }
 
   void _handleSyncTask(SynchronousTask<T> task) {
-    _changeState((task).run(), task);
-  }
-
-  @mustCallSuper
-  void run(Task<T> task) {
-    if (task is AsynchronousTask<T>) {
-      _handleAsyncTask(task);
-    } else if (task is SynchronousTask<T>) {
-      _handleSyncTask(task);
-    }
-  }
-
-  @mustCallSuper
-  Future<void> killById({required String taskId}) async {
-    final reference = _references[safelyExtractTaskIdFromString(taskId)];
-    final task = reference?.task;
-    if (task is! CancelableAsyncTaskMixin<T>) return;
-    return kill(task);
-  }
-
-  @mustCallSuper
-  void dispose() {
-    _onStateChangedController.close();
-    _onEventController.close();
+    _changeState(task.run(), task);
   }
 }

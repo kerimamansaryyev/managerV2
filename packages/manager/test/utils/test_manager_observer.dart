@@ -18,13 +18,13 @@ class TestObserver0 extends ManagerObserver<int> {
 
   @override
   void onCreated(Manager<int> manager) {
-    TestCounterManager.onCreatedCalled++;
+    TestCounterManager._onCreatedCalled++;
     super.onCreated(manager);
   }
 
   @override
   void onDisposed(Manager<int> manager) {
-    TestCounterManager.onDisposeCalled++;
+    TestCounterManager._onDisposeCalled++;
     super.onDisposed(manager);
   }
 
@@ -51,13 +51,13 @@ class TestObserver1 extends ManagerObserver<int> {
 
   @override
   void onCreated(Manager<int> manager) {
-    TestCounterManager.onCreatedCalled++;
+    TestCounterManager._onCreatedCalled++;
     super.onCreated(manager);
   }
 
   @override
   void onDisposed(Manager<int> manager) {
-    TestCounterManager.onDisposeCalled++;
+    TestCounterManager._onDisposeCalled++;
     super.onDisposed(manager);
   }
 
@@ -69,21 +69,26 @@ class TestObserver1 extends ManagerObserver<int> {
 }
 
 class TestCounterManager extends Manager<int> with ObservableManagerMixin<int> {
-  static int onCreatedCalled = 0;
-  static int onDisposeCalled = 0;
-
-  static void tearDown() {
-    onCreatedCalled = 0;
-    onDisposeCalled = 0;
-  }
-
-  @override
-  void mutateState(int newState) {
-    if (newState != 2) super.mutateState(newState);
-  }
-
   static final observer0 = TestObserver0();
   static final observer1 = TestObserver1();
 
   TestCounterManager(super.initialValue);
+
+  static int get onCreatedCalled => _onCreatedCalled;
+  static int get onDisposedCalled => _onDisposeCalled;
+
+  @override
+  void mutateState(int newState) {
+    if (newState != 2) {
+      super.mutateState(newState);
+    }
+  }
+
+  static int _onCreatedCalled = 0;
+  static int _onDisposeCalled = 0;
+
+  static void tearDown() {
+    _onCreatedCalled = 0;
+    _onDisposeCalled = 0;
+  }
 }

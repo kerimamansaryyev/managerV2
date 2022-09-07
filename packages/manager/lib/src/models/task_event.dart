@@ -13,43 +13,42 @@ class TaskLoadingEvent<T> implements TaskEvent<T> {
   @override
   final Task<T> task;
 
+  const TaskLoadingEvent(this.task);
+
   @override
   TaskProgressStatus get status => TaskProgressStatus.loading;
-
-  const TaskLoadingEvent(this.task);
 }
 
 class TaskErrorEvent<T> implements TaskEvent<T> {
-  @override
-  TaskProgressStatus get status => TaskProgressStatus.error;
-
-  @override
-  final Task<T> task;
-
   final dynamic exception;
   final StackTrace? stackTrace;
 
-  const TaskErrorEvent(this.task, this.exception, this.stackTrace);
-}
-
-class TaskSuccessEvent<T> implements TaskEvent<T> {
-  @override
-  TaskProgressStatus get status => TaskProgressStatus.error;
-
   @override
   final Task<T> task;
 
+  const TaskErrorEvent(this.task, this.exception, this.stackTrace);
+
+  @override
+  TaskProgressStatus get status => TaskProgressStatus.error;
+}
+
+class TaskSuccessEvent<T> implements TaskEvent<T> {
   final T result;
+  @override
+  final Task<T> task;
 
   const TaskSuccessEvent(this.task, this.result);
+
+  @override
+  TaskProgressStatus get status => TaskProgressStatus.error;
 }
 
 class TaskKillEvent<T> implements TaskEvent<T> {
   @override
-  TaskProgressStatus get status => TaskProgressStatus.killed;
-
-  @override
   final Task<T> task;
 
   const TaskKillEvent(this.task);
+
+  @override
+  TaskProgressStatus get status => TaskProgressStatus.killed;
 }
