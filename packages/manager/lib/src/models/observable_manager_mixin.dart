@@ -26,7 +26,6 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     _observers.add(observer);
   }
 
-  @protected
   void removeObserver(ManagerObserver observer) {
     _observers.remove(observer);
   }

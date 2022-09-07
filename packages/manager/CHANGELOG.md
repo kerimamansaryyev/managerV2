@@ -8,6 +8,7 @@ Instead, the following static semantic methods were added to do a type check.
   - `ManagerObserver.doIfManagerIs`
   - `ManagerObserver.doIfEventIs`
   - `ManagerObserver.doIfTaskIs`
+- `ObservableManagerMixin`'s `.addObserver` and `.removeObserver` methods are now public.
 ## 0.1.0
 `BREAKING CHANGES`:
 - `ObservableManagerMixin`'s `initialize` was renamed to `initializeObservers`
