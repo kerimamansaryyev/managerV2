@@ -6,6 +6,7 @@ import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:manager/src/models/task_mixins.dart';
 import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 
 typedef AsyncTaskCompleterReferenceTable<T>
     = Map<String, AsyncTaskCompleterReference<T>>;
@@ -16,6 +17,8 @@ abstract class Manager<T> {
       StreamController.broadcast();
   final StreamController<TaskEvent<T>> _onEventController =
       StreamController.broadcast();
+  final BehaviorSubject<TaskEvent<T>> _onEventControllerWithLatestEvent =
+      BehaviorSubject();
 
   T _state;
 
@@ -27,8 +30,9 @@ abstract class Manager<T> {
       StreamGroup.mergeBroadcast([on(), onStateChanged]).map((event) {
         return;
       });
-  Stream<TaskEvent<T>> on<S extends Task<T>>({String? taskId}) =>
-      _onEventController.stream.where(
+  Stream<TaskEvent<T>> on<S extends Task<T>>(
+          {String? taskId, bool withLatest = false}) =>
+      _decideOnEventControllerStream(withLatest).where(
         (event) =>
             (taskId == null && S == Task<T>) ||
             (taskId == event.task.id && event.task is S) ||
@@ -63,6 +67,7 @@ abstract class Manager<T> {
   void dispose() {
     _onStateChangedController.close();
     _onEventController.close();
+    _onEventControllerWithLatestEvent.close();
   }
 
   @visibleForTesting
@@ -105,6 +110,14 @@ abstract class Manager<T> {
   @protected
   String safelyExtractTaskIdFromString(String taskId) => taskId;
 
+  Stream<TaskEvent<T>> _decideOnEventControllerStream(bool withLatestEvent) {
+    if (withLatestEvent) {
+      return _onEventControllerWithLatestEvent.stream;
+    } else {
+      return _onEventController.stream;
+    }
+  }
+
   AsyncTaskCompleterReference<T>? _stopAndReturnReference(
     AsynchronousTask<T> task,
   ) {
@@ -133,8 +146,10 @@ abstract class Manager<T> {
   }
 
   void _passEvent(TaskEvent<T> event) {
-    if (!_onEventController.isClosed) {
+    if (!_onEventController.isClosed &&
+        !_onEventControllerWithLatestEvent.isClosed) {
       _onEventController.add(event);
+      _onEventControllerWithLatestEvent.add(event);
       onEventCallback(event);
     }
   }

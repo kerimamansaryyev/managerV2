@@ -172,6 +172,29 @@ void main() {
     });
   });
   group('Testing .on method - ', () {
+    test(
+        'Stream will give events only after listening. But if you add withLatest: true, it will instantly fire the latest event',
+        () {
+      final manager = event_utils.TestCountManager(0);
+      manager.run(event_utils.TestCounterSyncValueTask(id: 'one', value: 2));
+      expectLater(
+        manager
+            .on()
+            .where((event) => event is TaskSuccessEvent)
+            .map((event) => event.task.id),
+        emitsInOrder(['two', 'three', emitsDone]),
+      );
+      expectLater(
+        manager
+            .on(withLatest: true)
+            .where((event) => event is TaskSuccessEvent)
+            .map((event) => event.task.id),
+        emitsInOrder(['one', 'two', 'three', emitsDone]),
+      );
+      manager.run(event_utils.TestCounterSyncValueTask(id: 'two', value: 2));
+      manager.run(event_utils.TestCounterSyncValueTask(id: 'three', value: 2));
+      manager.dispose();
+    });
     test('Stream extensions must give events respective to their semantics',
         () async {
       final manager = event_utils.TestCountManager(0);
