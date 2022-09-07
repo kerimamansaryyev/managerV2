@@ -3,7 +3,8 @@ import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:meta/meta.dart';
 
-typedef StateMutationCallback<T> = void Function(T oldState, T newState);
+typedef StateMutationCastedCallback<T> = void Function(T oldState, T newState);
+typedef CastedValueCallback<T> = void Function(T);
 
 abstract class ManagerObserver {
   @internal
@@ -23,9 +24,9 @@ abstract class ManagerObserver {
   ) {}
 
   @protected
-  static void doIfValueIs<T>(dynamic value, void Function() callback) {
+  static void doIfValueIs<T>(dynamic value, CastedValueCallback<T> callback) {
     if (value is T) {
-      callback();
+      callback(value);
     }
   }
 
@@ -33,7 +34,7 @@ abstract class ManagerObserver {
   static void doOnStateMutatedIfValuesAre<T>(
     oldState,
     newState,
-    StateMutationCallback<T> onStateMutatedCallBack,
+    StateMutationCastedCallback<T> onStateMutatedCallBack,
   ) {
     if (oldState is T && newState is T) {
       onStateMutatedCallBack(oldState, newState);
@@ -43,25 +44,25 @@ abstract class ManagerObserver {
   @protected
   static void doIfManagerIs<M extends Manager>(
     Manager manager,
-    void Function() callback,
+    CastedValueCallback<M> callback,
   ) =>
       doIfValueIs<M>(manager, callback);
 
   @protected
   static void doIfEventIs<E extends TaskEvent>(
     TaskEvent event,
-    void Function() callback,
+    CastedValueCallback<E> callback,
   ) =>
       doIfValueIs<E>(event, callback);
 
   @protected
   static void doIfTaskIs<T extends Task<dynamic>>(
     Task task,
-    void Function() callback, {
+    CastedValueCallback<T> callback, {
     String? whenTaskId,
   }) {
     if (Manager.tasFlexibleFilter<T, dynamic>(task, whenTaskId)) {
-      callback();
+      callback(task as T);
     }
   }
 }

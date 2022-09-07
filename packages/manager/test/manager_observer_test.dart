@@ -25,40 +25,40 @@ class _TestCounterManagerTypeCheckObserver extends ManagerObserver {
 
   @override
   void onEvent(Manager manager, TaskEvent event) {
-    ManagerObserver.doIfEventIs(event, () => _onDoIfEventCalled++);
+    ManagerObserver.doIfEventIs(event, (_) => _onDoIfEventCalled++);
     ManagerObserver.doIfEventIs<TaskSuccessEvent>(
       event,
-      () => _onDoIfEventCalled++,
+      (_) => _onDoIfEventCalled++,
     );
     ManagerObserver.doIfManagerIs<
-        test_manager_observer.TestCounterManagerTypeCheck2>(manager, () {
-      ManagerObserver.doIfEventIs<TaskLoadingEvent>(event, () {
+        test_manager_observer.TestCounterManagerTypeCheck2>(manager, (_) {
+      ManagerObserver.doIfEventIs<TaskLoadingEvent>(event, (_) {
         _onDoIfEventCalled++;
       });
     });
-    ManagerObserver.doIfEventIs<TaskSuccessEvent>(event, () {
-      ManagerObserver.doIfTaskIs(event.task, () => _onDoTaskIfIsCalled++);
+    ManagerObserver.doIfEventIs<TaskSuccessEvent>(event, (_) {
+      ManagerObserver.doIfTaskIs(event.task, (_) => _onDoTaskIfIsCalled++);
       ManagerObserver.doIfTaskIs(
         event.task,
-        () => _onDoTaskIfIsCalled++,
+        (_) => _onDoTaskIfIsCalled++,
         whenTaskId: 'one',
       );
       ManagerObserver.doIfTaskIs<_TestGenericAsyncTask>(
         event.task,
-        () => _onDoTaskIfIsCalled++,
+        (_) => _onDoTaskIfIsCalled++,
       );
       ManagerObserver.doIfTaskIs<_TestGenericAsyncTask>(
         event.task,
-        () => _onDoTaskIfIsCalled++,
+        (_) => _onDoTaskIfIsCalled++,
         whenTaskId: 'one',
       );
       ManagerObserver.doIfTaskIs<AsynchronousTask<int>>(
         event.task,
-        () => _onDoTaskIfIsCalled++,
+        (_) => _onDoTaskIfIsCalled++,
       );
       ManagerObserver.doIfTaskIs<AsynchronousTask>(
         event.task,
-        () => _onDoTaskIfIsCalled++,
+        (_) => _onDoTaskIfIsCalled++,
       );
     });
   }
@@ -69,15 +69,15 @@ class _TestCounterManagerTypeCheckObserver extends ManagerObserver {
     oldState,
     newState,
   ) {
-    ManagerObserver.doIfManagerIs(manager, () {
+    ManagerObserver.doIfManagerIs(manager, (_) {
       _onDoIfManagerCalled++;
     });
     ManagerObserver.doIfManagerIs<
-        test_manager_observer.TestCounterManagerTypeCheck1>(manager, () {
+        test_manager_observer.TestCounterManagerTypeCheck1>(manager, (_) {
       _onDoIfManagerCalled++;
     });
     ManagerObserver.doIfManagerIs<
-        test_manager_observer.TestCounterManagerTypeCheck2>(manager, () {
+        test_manager_observer.TestCounterManagerTypeCheck2>(manager, (_) {
       _onDoIfManagerCalled++;
     });
   }

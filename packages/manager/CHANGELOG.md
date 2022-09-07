@@ -1,3 +1,10 @@
+## 0.1.5
+  `CastedValueCallback<T>` will be required for the following type check static methods:
+  - `ManagerObserver.doIfManagerIs`
+  - `ManagerObserver.doIfValueIs`
+  - `ManagerObserver.doIfManagerIs`
+  - `ManagerObserver.doIfEventIs`
+  - `ManagerObserver.doIfTaskIs`
 ## 0.1.2
 `BREAKING CHANGES`:
 - In order to make the observers be able to bind to multiple managers, the type parameters of `ManagerObserver` and `ObservableManagerMixin`.
