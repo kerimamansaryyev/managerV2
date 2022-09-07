@@ -1,3 +1,13 @@
+## 0.1.2
+`BREAKING CHANGES`:
+- In order to make the observers be able to bind to multiple managers, the type parameters of `ManagerObserver` and `ObservableManagerMixin`.
+Instead, the following static semantic methods were added to do a type check.
+  - `ManagerObserver.doIfManagerIs`
+  - `ManagerObserver.doIfValueIs`
+  - `ManagerObserver.doOnStateMutatedIfValuesAre`
+  - `ManagerObserver.doIfManagerIs`
+  - `ManagerObserver.doIfEventIs`
+  - `ManagerObserver.doIfTaskIs`
 ## 0.1.0
 `BREAKING CHANGES`:
 - `ObservableManagerMixin`'s `initialize` was renamed to `initializeObservers`

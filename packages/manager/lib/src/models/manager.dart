@@ -40,17 +40,26 @@ abstract class Manager<T> {
   }) =>
       _decideOnStateControllerStream(withLatest);
 
+  /// Filters according to the conditions:
+  /// - `(taskId == null && S == Task<V>)` => both [taskId] and [S] are not provided
+  ///
+  /// or
+  ///
+  /// - `(taskId == task.id && S == Task<V>)` => [taskId] matches the condition and [S] is not provided
+  ///
+  /// or
+  ///
+  /// - `(taskId == task.id && task is S)` => both [taskId] and [S] match the bounds
+  ///
+  /// or
+  ///
+  /// - `(taskId == null && task is S)` => [taskId] is not provided and [S] matches the bounds
   Stream<TaskEvent<T>> on<S extends Task<T>>({
     String? taskId,
     bool withLatest = false,
   }) =>
-      _decideOnEventControllerStream(withLatest).where(
-        (event) =>
-            (taskId == null && S == Task<T>) ||
-            (taskId == event.task.id && event.task is S) ||
-            (taskId == null && event.task is S) ||
-            (taskId == event.task.id && S == Task<T>),
-      );
+      _decideOnEventControllerStream(withLatest)
+          .where((event) => tasFlexibleFilter<S, T>(event.task, taskId));
   AsyncTaskCompleterReference<T>? getAsyncReferenceOf({
     required String taskId,
   }) =>
@@ -230,4 +239,28 @@ abstract class Manager<T> {
   void _handleSyncTask(SynchronousTask<T> task) {
     _changeState(task.run(), task);
   }
+
+  /// Filters according to the conditions:
+  /// - `(taskId == null && S == Task<V>)` => both [taskId] and [S] are not provided
+  ///
+  /// or
+  ///
+  /// - `(taskId == task.id && S == Task<V>)` => [taskId] matches the condition and [S] is not provided
+  ///
+  /// or
+  ///
+  /// - `(taskId == task.id && task is S)` => both [taskId] and [S] match the bounds
+  ///
+  /// or
+  ///
+  /// - `(taskId == null && task is S)` => [taskId] is not provided and [S] matches the bounds
+  @internal
+  static bool tasFlexibleFilter<S extends Task<V>, V>(
+    Task task,
+    String? taskId,
+  ) =>
+      (taskId == null && S == Task<V>) ||
+      (taskId == task.id && S == Task<V>) ||
+      (taskId == task.id && task is S) ||
+      (taskId == null && task is S);
 }

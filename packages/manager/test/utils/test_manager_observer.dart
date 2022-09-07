@@ -2,7 +2,17 @@ import 'package:manager/src/models/manager.dart';
 import 'package:manager/src/models/observable_manager_mixin.dart';
 import 'package:manager/src/models/observer.dart';
 
-class TestObserver0 extends ManagerObserver<int> {
+class TestCounterManagerTypeCheck1 extends Manager<int>
+    with ObservableManagerMixin<int> {
+  TestCounterManagerTypeCheck1(super.initialValue);
+}
+
+class TestCounterManagerTypeCheck2 extends Manager<String>
+    with ObservableManagerMixin<String> {
+  TestCounterManagerTypeCheck2(super.initialValue);
+}
+
+class TestObserver0 extends ManagerObserver {
   int eventCount = 0;
   bool hasStateMutated = false;
 
@@ -17,25 +27,25 @@ class TestObserver0 extends ManagerObserver<int> {
   }
 
   @override
-  void onCreated(Manager<int> manager) {
+  void onCreated(Manager manager) {
     TestCounterManager._onCreatedCalled++;
     super.onCreated(manager);
   }
 
   @override
-  void onDisposed(Manager<int> manager) {
+  void onDisposed(Manager manager) {
     TestCounterManager._onDisposeCalled++;
     super.onDisposed(manager);
   }
 
   @override
-  void onStateMutated(int oldState, int newState) {
+  void onStateMutated(Manager manager, oldState, newState) {
     hasStateMutated = true;
-    super.onStateMutated(oldState, newState);
+    super.onStateMutated(manager, oldState, newState);
   }
 }
 
-class TestObserver1 extends ManagerObserver<int> {
+class TestObserver1 extends ManagerObserver {
   int eventCount = 0;
   bool hasStateMutated = false;
 
@@ -50,21 +60,21 @@ class TestObserver1 extends ManagerObserver<int> {
   }
 
   @override
-  void onCreated(Manager<int> manager) {
+  void onCreated(Manager manager) {
     TestCounterManager._onCreatedCalled++;
     super.onCreated(manager);
   }
 
   @override
-  void onDisposed(Manager<int> manager) {
+  void onDisposed(Manager manager) {
     TestCounterManager._onDisposeCalled++;
     super.onDisposed(manager);
   }
 
   @override
-  void onStateMutated(int oldState, int newState) {
+  void onStateMutated(Manager manager, oldState, newState) {
     hasStateMutated = true;
-    super.onStateMutated(oldState, newState);
+    super.onStateMutated(manager, oldState, newState);
   }
 }
 

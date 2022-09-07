@@ -10,24 +10,24 @@ mixin ObservableManagerMixin<T> on Manager<T> {
   List<ManagerObserver> get observers => [..._observers];
 
   @visibleForTesting
-  void addObserverTest(ManagerObserver<T> observer) {
+  void addObserverTest(ManagerObserver observer) {
     addObserver(observer);
   }
 
   @visibleForTesting
-  void removeObserverTest(ManagerObserver<T> observer) {
+  void removeObserverTest(ManagerObserver observer) {
     removeObserver(observer);
   }
 
   @visibleForTesting
   void initializeTest() => initializeObservers();
 
-  void addObserver(ManagerObserver<T> observer) {
+  void addObserver(ManagerObserver observer) {
     _observers.add(observer);
   }
 
   @protected
-  void removeObserver(ManagerObserver<T> observer) {
+  void removeObserver(ManagerObserver observer) {
     _observers.remove(observer);
   }
 
@@ -75,7 +75,7 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     super.mutateState(newState);
     final finalState = state;
     for (var observer in _observers) {
-      observer.onStateMutated(potentialState, finalState);
+      observer.onStateMutated(this, potentialState, finalState);
     }
   }
 }
