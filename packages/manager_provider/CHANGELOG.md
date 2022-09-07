@@ -1,3 +1,6 @@
+## 0.1.5
+
+Synced with `manager:0.1.5` requiring `CastedValueCallback<T>` for the static type check methods of `ManagerObserver`
 ## 0.1.2
 
 Migrated to the new version of `manager` keeping up-to-date with the breaking changes.
