@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 
 class ManagerProvider<T extends Manager> extends InheritedProvider<T> {
   ManagerProvider({
-    Key? key,
     required Create<T> create,
+    Key? key,
     bool? lazy,
     TransitionBuilder? builder,
     Widget? child,
@@ -20,8 +20,8 @@ class ManagerProvider<T extends Manager> extends InheritedProvider<T> {
         );
 
   ManagerProvider.value({
-    Key? key,
     required T value,
+    Key? key,
     UpdateShouldNotify<T>? updateShouldNotify,
     TransitionBuilder? builder,
     Widget? child,
@@ -34,6 +34,20 @@ class ManagerProvider<T extends Manager> extends InheritedProvider<T> {
           child: child,
         );
 
+  static T of<T extends Manager>(BuildContext context, {bool listen = true}) =>
+      Provider.of<T>(context, listen: listen);
+
+  static T? maybeOf<T extends Manager>(
+    BuildContext context, {
+    bool listen = true,
+  }) {
+    try {
+      return of<T>(context, listen: listen);
+    } catch (e) {
+      return null;
+    }
+  }
+
   static VoidCallback _startListening(
     InheritedContext<Manager?> e,
     Manager value,
@@ -44,18 +58,8 @@ class ManagerProvider<T extends Manager> extends InheritedProvider<T> {
   }
 
   static void _disposeManager<T extends Manager>(
-          BuildContext _, Manager manager) =>
+    BuildContext _,
+    Manager manager,
+  ) =>
       manager.dispose();
-
-  static T of<T extends Manager>(BuildContext context, {bool listen = true}) =>
-      Provider.of<T>(context, listen: listen);
-
-  static T? maybeOf<T extends Manager>(BuildContext context,
-      {bool listen = true}) {
-    try {
-      return of<T>(context, listen: listen);
-    } catch (e) {
-      return null;
-    }
-  }
 }

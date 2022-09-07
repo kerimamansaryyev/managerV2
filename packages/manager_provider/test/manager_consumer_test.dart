@@ -12,25 +12,31 @@ void main() {
       (tester) async {
     final manager = manager_provider_test_utils.TestCounterManager(0);
     int eventsCount = 0;
-    await tester.pumpWidget(MaterialApp(
-      home: ManagerProvider.value(
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ManagerProvider.value(
           value: manager,
           builder: (context, __) =>
               ManagerConsumer<manager_provider_test_utils.TestCounterManager>(
-                builder: (context, manager) => Text(manager.state.toString()),
-                onUpdate: () {
-                  eventsCount++;
-                },
-              )),
-    ));
+            builder: (context, manager) => Text(manager.state.toString()),
+            onUpdate: () {
+              eventsCount++;
+            },
+          ),
+        ),
+      ),
+    );
     expect(find.text('0'), findsOneWidget);
     // +1 event: Loading
-    manager.run(AsynchronousTask.generic(
+    manager.run(
+      AsynchronousTask.generic(
         id: 'one',
         computation: () async {
           await Future.delayed(const Duration(seconds: 2));
           return 2;
-        }));
+        },
+      ),
+    );
     await tester.pumpAndSettle(const Duration(seconds: 2));
     // +2 events: Success, State is changed
     expect(find.text('2'), findsOneWidget);

@@ -5,11 +5,16 @@ import 'package:manager/manager.dart';
 import 'package:manager_provider/src/manager_provider.dart';
 
 typedef ManagerSelectorExtractor<M extends Manager, V> = V Function(
-    BuildContext context, M manager);
+  BuildContext context,
+  M manager,
+);
 typedef ManagerSelectedDecisionPredicate<V> = bool Function(V prev, V next);
 typedef ManagerSelectorUpdateCallback = void Function();
 typedef ManagerSelectorBuilder<V> = Widget Function(
-    BuildContext context, V value, Widget? child);
+  BuildContext context,
+  V value,
+  Widget? child,
+);
 
 mixin ManagerSelectorWidgetInterfaceMixin<M extends Manager, V>
     on StatefulWidget {

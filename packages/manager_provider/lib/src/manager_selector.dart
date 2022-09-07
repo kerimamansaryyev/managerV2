@@ -6,18 +6,6 @@ void _emptyCallback() {}
 
 class ManagerSelector<M extends Manager, V> extends StatefulWidget
     with ManagerSelectorWidgetInterfaceMixin<M, V> {
-  const ManagerSelector(
-      {Key? key,
-      this.child,
-      this.onUpdate = _emptyCallback,
-      required this.builder,
-      required this.selector,
-      required this.shouldUpdate})
-      : super(key: key);
-
-  @override
-  State<ManagerSelector> createState() => _ManagerSelectorState<M, V>();
-
   @override
   final ManagerSelectorBuilder<V> builder;
 
@@ -32,6 +20,18 @@ class ManagerSelector<M extends Manager, V> extends StatefulWidget
 
   @override
   final ManagerSelectedDecisionPredicate<V> shouldUpdate;
+
+  const ManagerSelector({
+    required this.builder,
+    required this.selector,
+    required this.shouldUpdate,
+    Key? key,
+    this.child,
+    this.onUpdate = _emptyCallback,
+  }) : super(key: key);
+
+  @override
+  State<ManagerSelector> createState() => _ManagerSelectorState<M, V>();
 }
 
 class _ManagerSelectorState<M extends Manager, V>
