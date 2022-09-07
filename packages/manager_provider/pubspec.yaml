@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  manager: ^0.1.2
+  manager: ^0.1.5
   provider: ^6.0.3
 
 dev_dependencies:
