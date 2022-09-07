@@ -1,3 +1,11 @@
+## 0.1.0
+`BREAKING CHANGES`:
+- `ObservableManagerMixin`'s `initialize` was renamed to `initializeObservers`
+- `Manager`'s `onStateChanged` getter was reformed to a method accepting `withLatest` optional argument.
+
+`Other changes`:
+- `Manager`'s `on` method has now an optional parameter `withLatest` using which will return `BehaviourSubject`'s value stream to get the latest event
+emitted when listening to it.
 ## 0.0.7
 Fixed an issue of mixins overriding methods of each other without calling `super`
 ## 0.0.6

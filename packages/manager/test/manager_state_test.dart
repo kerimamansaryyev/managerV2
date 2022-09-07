@@ -8,6 +8,26 @@ import 'utils/test_count_manager_state.dart';
 /// It's okay to ignore the rule for tests
 // ignore: long-method
 void main() {
+  test('onStateChanged() withLatest:true gives the latest emmited value', () {
+    final manager = TestManagerStateCountManager(0);
+    manager.run(SynchronousTask.generic(id: 'one', result: 1));
+    expectLater(
+      manager.onStateChanged(),
+      emitsInOrder([2, emitsDone]),
+    );
+    expectLater(
+      manager.onStateChanged(withLatest: true),
+      emitsInOrder([1, 2, emitsDone]),
+    );
+    manager.run(SynchronousTask.generic(id: 'two', result: 2));
+    manager.dispose();
+  });
+  test(
+      'onStateChanged() withLatest:true gives the initial value on first listen',
+      () {
+    final manager = TestManagerStateCountManager(0);
+    expectLater(manager.onStateChanged(withLatest: true), emits(0));
+  });
   test('State is 0 by default', () {
     final manager = TestManagerStateCountManager(0);
     expect(manager.state, 0);
@@ -20,7 +40,7 @@ void main() {
         () {
       final manager = TestManagerStateCountManager(0);
       expectLater(
-        manager.onStateChanged,
+        manager.onStateChanged(),
         emitsInOrder([1, 2, 4, 7, emitsDone]),
       );
       manager.incrementSync0(id: '0');
@@ -48,7 +68,7 @@ void main() {
         'onStateChanged must emit an event when the state changes by running a successfull task',
         () {
       final manager = TestManagerStateCountManager(0);
-      expectLater(manager.onStateChanged, emits(1));
+      expectLater(manager.onStateChanged(), emits(1));
       manager.increment0(id: '0');
     });
 
@@ -58,7 +78,7 @@ void main() {
       final manager = TestManagerStateCountManager(0);
       unawaited(
         expectLater(
-          manager.onStateChanged,
+          manager.onStateChanged(),
           emitsInOrder([1, 11, emitsDone]),
         ),
       );
@@ -110,7 +130,7 @@ void main() {
       () {
     final manager =
         TestCounterConditionedManager(0, (newState) => newState > 1);
-    expectLater(manager.onStateChanged, emitsInOrder([2, 3, emitsDone]));
+    expectLater(manager.onStateChanged(), emitsInOrder([2, 3, emitsDone]));
     manager.run(SynchronousTask.generic(id: 'one', result: 1));
     expect(manager.state, 0);
     manager.run(SynchronousTask.generic(id: 'one', result: 2));

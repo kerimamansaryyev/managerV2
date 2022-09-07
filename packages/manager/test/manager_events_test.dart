@@ -137,7 +137,7 @@ void main() {
       final firstLevelEmitValue = 3;
       final secondLevelEmitValue = 2;
       unawaited(
-        expectLater(manager.onStateChanged, neverEmits(firstLevelEmitValue)),
+        expectLater(manager.onStateChanged(), neverEmits(firstLevelEmitValue)),
       );
       unawaited(
         expectLater(
@@ -413,7 +413,7 @@ void main() {
   group('Testing synchronous tasks - ', () {
     test('Synchronous tasks are executed in order that they were called', () {
       final manager = event_utils.TestCountManager(0);
-      expectLater(manager.onStateChanged, emitsInOrder([1, 2, 3, emitsDone]));
+      expectLater(manager.onStateChanged(), emitsInOrder([1, 2, 3, emitsDone]));
       manager.run(event_utils.TestCounterSyncValueTask(value: 1, id: '1'));
       manager.run(event_utils.TestCounterSyncValueTask(value: 2, id: '1'));
       manager.run(event_utils.TestCounterSyncValueTask(value: 3, id: '1'));

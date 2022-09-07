@@ -19,17 +19,27 @@ abstract class Manager<T> {
       StreamController.broadcast();
   final BehaviorSubject<TaskEvent<T>> _onEventControllerWithLatestEvent =
       BehaviorSubject();
+  late final BehaviorSubject<T> _onStateChangedControllerWithLatest;
 
   T _state;
 
-  Manager(T initialValue) : _state = initialValue;
+  Manager(T initialValue)
+      : _state = initialValue,
+        _onStateChangedControllerWithLatest =
+            BehaviorSubject.seeded(initialValue);
 
   T get state => _state;
-  Stream<T> get onStateChanged => _onStateChangedController.stream;
+
   Stream<void> get onUpdated =>
-      StreamGroup.mergeBroadcast([on(), onStateChanged]).map((event) {
+      StreamGroup.mergeBroadcast([on(), onStateChanged()]).map((event) {
         return;
       });
+
+  Stream<T> onStateChanged({
+    bool withLatest = false,
+  }) =>
+      _decideOnStateControllerStream(withLatest);
+
   Stream<TaskEvent<T>> on<S extends Task<T>>({
     String? taskId,
     bool withLatest = false,
@@ -68,6 +78,7 @@ abstract class Manager<T> {
   @mustCallSuper
   void dispose() {
     _onStateChangedController.close();
+    _onStateChangedControllerWithLatest.close();
     _onEventController.close();
     _onEventControllerWithLatestEvent.close();
   }
@@ -85,8 +96,10 @@ abstract class Manager<T> {
   @protected
   void mutateState(T newState) {
     _state = newState;
-    if (!_onStateChangedController.isClosed) {
+    if (!_onStateChangedController.isClosed &&
+        !_onStateChangedControllerWithLatest.isClosed) {
       _onStateChangedController.add(_state);
+      _onStateChangedControllerWithLatest.add(state);
     }
   }
 
@@ -117,6 +130,14 @@ abstract class Manager<T> {
       return _onEventControllerWithLatestEvent.stream;
     } else {
       return _onEventController.stream;
+    }
+  }
+
+  Stream<T> _decideOnStateControllerStream(bool withLatestEvent) {
+    if (withLatestEvent) {
+      return _onStateChangedControllerWithLatest.stream;
+    } else {
+      return _onStateChangedController.stream;
     }
   }
 
