@@ -1,3 +1,6 @@
+## 0.1.6
+
+Added `ManagerWidgetsObserverMixin` to make managers observable from widget states
 ## 0.1.5
 
 Synced with `manager:0.1.5` requiring `CastedValueCallback<T>` for the static type check methods of `ManagerObserver`
