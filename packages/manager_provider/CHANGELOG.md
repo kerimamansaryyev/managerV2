@@ -1,3 +1,5 @@
+## 0.1.7
+Syncing with `manager:0.1.7`.
 ## 0.1.6
 
 Added `ManagerWidgetsObserverMixin` to make managers observable from widget states
