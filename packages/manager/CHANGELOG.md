@@ -1,3 +1,5 @@
+## 0.1.7
+Cleared an `example` folder and `README.md` 
 ## 0.1.6
 Updated the `README.md` and the API reference of the package
 ## 0.1.5

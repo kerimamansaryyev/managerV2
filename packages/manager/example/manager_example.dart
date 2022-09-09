@@ -58,31 +58,6 @@ class CounterManager extends Manager<int>
   CounterManager(super.initialValue);
 }
 
-class SimpleCounterManager extends Manager<int> {
-  SimpleCounterManager(super.initialValue);
-
-  void incrementSync() =>
-      run(SynchronousTask.generic(id: 'increment', result: state + 1));
-
-  void decrementAsync() => run(
-        AsynchronousTask.generic(
-          id: 'decrement',
-          computation: () =>
-              Future.delayed(const Duration(seconds: 2), () => state - 1),
-        ),
-      );
-
-  void decrementAsyncError() => run(
-        AsynchronousTask.generic(
-          id: 'decrement',
-          computation: () async {
-            await Future.delayed(const Duration(seconds: 2));
-            throw Exception();
-          },
-        ),
-      );
-}
-
 void main() async {
   // Creating a manager
   final manager = CounterManager(0);
