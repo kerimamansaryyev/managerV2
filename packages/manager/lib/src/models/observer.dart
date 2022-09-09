@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 typedef StateMutationCastedCallback<T> = void Function(T oldState, T newState);
 typedef CastedValueCallback<T> = void Function(T);
 
+/// A class that can observe multiple [Manager]s.
 abstract class ManagerObserver {
   @internal
   void onCreated(Manager manager) {}

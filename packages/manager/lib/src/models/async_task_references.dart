@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:manager/src/models/manager.dart';
 import 'package:manager/src/models/task.dart';
 import 'package:meta/meta.dart';
 
+/// A class that represents a references saved and tracked by [Manager]
 @immutable
 class AsyncTaskCompleterReference<T> {
   @protected

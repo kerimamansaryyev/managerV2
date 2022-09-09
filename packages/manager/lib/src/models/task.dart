@@ -1,10 +1,17 @@
 import 'dart:async';
 
+import 'package:manager/src/models/manager.dart';
 import 'package:meta/meta.dart';
 
+/// A structure that represents a mutation operation
+/// applied to [Manager.run].
+///
+/// [id] is used to distinguish one task from another while being tracked by [Manager].
 @immutable
 abstract class Task<T> {
   const Task();
+
+  /// Used to distinguish one task from another while being tracked by [Manager].
   String get id;
 
   FutureOr<T> run();

@@ -1,5 +1,7 @@
+## 0.1.6
+Updated the `README.md` and the API reference of the package
 ## 0.1.5
-  `CastedValueCallback<T>` will be required for the following type check static methods:
+`CastedValueCallback<T>` will be required for the following type check static methods:
   - `ManagerObserver.doIfManagerIs`
   - `ManagerObserver.doIfValueIs`
   - `ManagerObserver.doIfManagerIs`

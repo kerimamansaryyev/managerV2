@@ -8,6 +8,10 @@ import 'package:manager/src/models/task_mixins.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
+class ManagerDisposedException implements Exception {
+  const ManagerDisposedException();
+}
+
 typedef AsyncTaskCompleterReferenceTable<T>
     = Map<String, AsyncTaskCompleterReference<T>>;
 
@@ -87,6 +91,10 @@ abstract class Manager<T> {
   }) =>
       _decideOnEventControllerStream(withLatest)
           .where((event) => tasFlexibleFilter<S, T>(event.task, taskId));
+
+  /// Gives a reference for the [AsynchronousTask] tracked by the manager by [taskId].
+  ///
+  /// See also: [AsyncTaskCompleterReference]
   AsyncTaskCompleterReference<T>? getAsyncReferenceOf({
     required String taskId,
   }) =>
@@ -100,6 +108,9 @@ abstract class Manager<T> {
   /// - If future [AsynchronousTask.run] of [task] completes with error - [TaskErrorEvent] will be added to the [on] stream. (If the reference to this task is not outdated.)
   @mustCallSuper
   void run(Task<T> task) {
+    if (isDisposed) {
+      throw const ManagerDisposedException();
+    }
     if (task is AsynchronousTask<T>) {
       _handleAsyncTask(task);
     } else if (task is SynchronousTask<T>) {
@@ -111,9 +122,14 @@ abstract class Manager<T> {
   ///
   /// It `won't` have effect if:
   /// - If there are no references found for [taskId]. (Hadn't been run previously or already completed with either [TaskSuccessEvent] or [TaskErrorEvent])
-  /// - The referenced task is not [CancelableAsyncTaskMixin]
+  /// - The referenced task is not [CancelableAsyncTaskMixin].
+  ///
+  /// See also: [kill]
   @mustCallSuper
   Future<void> killById({required String taskId}) async {
+    if (isDisposed) {
+      throw const ManagerDisposedException();
+    }
     final reference = _references[safelyExtractTaskIdFromString(taskId)];
     final task = reference?.task;
     if (task is! CancelableAsyncTaskMixin<T>) {
@@ -127,6 +143,9 @@ abstract class Manager<T> {
   /// `Warning`: if
   @mustCallSuper
   void dispose() {
+    if (isDisposed) {
+      throw const ManagerDisposedException();
+    }
     _isDisposed = true;
     _onStateChangedController.close();
     _onStateChangedControllerWithLatest.close();
@@ -143,6 +162,7 @@ abstract class Manager<T> {
       getAsyncReferenceOf(taskId: taskId)?.internalCompleterFuture ??
       Future.value(null);
 
+  /// This method changes the [_state] and adds events to [onStateChanged]
   @mustCallSuper
   @protected
   void mutateState(T newState) {
@@ -169,9 +189,11 @@ abstract class Manager<T> {
     _passEvent(TaskKillEvent<T>(task));
   }
 
+  /// Encapsulated method to form the id of [Task] to get a reference properly
   @protected
   String safelyGetTaskIdFromTask(Task<T> task) => task.id;
 
+  /// Encapsulated method to form the [taskId] to get a reference of tasks properly
   @protected
   String safelyExtractTaskIdFromString(String taskId) => taskId;
 
@@ -235,7 +257,7 @@ abstract class Manager<T> {
     T potentialState,
     AsyncTaskCompleterReference<T> reference,
   ) {
-    if (_isReferenceOutDated(reference)) {
+    if (_isReferenceOutDated(reference) || isDisposed) {
       return;
     }
     _changeState(potentialState, reference.task);
@@ -248,7 +270,7 @@ abstract class Manager<T> {
     dynamic error,
     StackTrace? trace,
   ) {
-    if (_isReferenceOutDated(reference)) {
+    if (_isReferenceOutDated(reference) || isDisposed) {
       return;
     }
     _passEvent(TaskErrorEvent<T>(reference.task, error, trace));
@@ -263,6 +285,10 @@ abstract class Manager<T> {
 
     if (stoppedTask is CancelableAsyncTaskMixin<T>) {
       await stoppedTask.kill();
+    }
+
+    if (isDisposed) {
+      return;
     }
 
     final newTaskReference = _createReferenceOf(task);
