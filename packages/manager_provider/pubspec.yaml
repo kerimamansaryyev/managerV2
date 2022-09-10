@@ -1,6 +1,6 @@
 name: manager_provider
 description: A provider wrapper and set of the widgets to use with manager package.
-version: 0.1.8
+version: 0.1.9
 
 repository: https://github.com/mcfugger/managerV2/tree/master/packages/manager_provider
 

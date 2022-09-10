@@ -1,3 +1,5 @@
+## 0.1.9
+Exporting `MultiManagerProvider`.
 ## 0.1.8
 Added `MultiManagerProvider`.
 ## 0.1.7
