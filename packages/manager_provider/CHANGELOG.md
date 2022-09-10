@@ -1,3 +1,5 @@
+## 0.1.8
+Added `MultiManagerProvider`.
 ## 0.1.7
 Syncing with `manager:0.1.7`.
 ## 0.1.6
