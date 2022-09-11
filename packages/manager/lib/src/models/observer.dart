@@ -1,4 +1,5 @@
 import 'package:manager/src/models/manager.dart';
+import 'package:manager/src/models/observer_base.dart';
 import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:meta/meta.dart';
@@ -7,17 +8,22 @@ typedef StateMutationCastedCallback<T> = void Function(T oldState, T newState);
 typedef CastedValueCallback<T> = void Function(T);
 
 /// A class that can observe multiple [Manager]s.
-abstract class ManagerObserver {
+abstract class ManagerObserver
+    implements ManagerObserverBase<Manager, dynamic> {
   @internal
+  @override
   void onCreated(Manager manager) {}
 
   @internal
+  @override
   void onDisposed(Manager manager) {}
 
   @internal
+  @override
   void onEvent(Manager manager, TaskEvent event) {}
 
   @internal
+  @override
   void onStateMutated(
     Manager manager,
     oldState,

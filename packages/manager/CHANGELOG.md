@@ -1,3 +1,5 @@
+## 0.1.8
+Added `SingleManagerObserver` to observe a specific manager. 
 ## 0.1.7
 Cleared an `example` folder and `README.md` 
 ## 0.1.6
