@@ -1,3 +1,5 @@
+## 0.1.9
+Fix: Providing type parameters to `SingleManagerObserver`. 
 ## 0.1.8
 Added `SingleManagerObserver` to observe a specific manager. 
 ## 0.1.7
