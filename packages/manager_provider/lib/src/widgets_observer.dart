@@ -15,3 +15,20 @@ mixin ManagerWidgetsObserverMixin<T extends StatefulWidget> on State<T>
   @override
   void onStateMutated(Manager manager, oldState, newState) {}
 }
+
+mixin SingleManagerWidgetsObserverMixin<
+    T extends StatefulWidget,
+    M extends Manager<S>,
+    S> on State<T> implements SingleManagerObserver<M, S> {
+  @override
+  void onCreated(M manager) {}
+
+  @override
+  void onDisposed(M manager) {}
+
+  @override
+  void onEvent(M manager, TaskEvent<S> event) {}
+
+  @override
+  void onStateMutated(M manager, S oldState, S newState) {}
+}
