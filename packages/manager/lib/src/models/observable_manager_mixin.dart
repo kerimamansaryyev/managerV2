@@ -1,11 +1,12 @@
 import 'package:manager/src/models/manager.dart';
 import 'package:manager/src/models/observer.dart';
+import 'package:manager/src/models/observer_base.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:meta/meta.dart';
 
 /// A special interface of [Manager] that can be observed by [ManagerObserver]s
 ///
-/// Adding an observer in constructor and calling [initializeObservers] will trigger [ManagerObserver.onCreated]
+/// Adding an observer in constructor and calling [initializeObservers] will trigger [ManagerObserverBase.onCreated]
 /// ```dart
 /// class CountManager extends Manager<int>{
 ///   CountManager():super(0){
@@ -28,18 +29,18 @@ import 'package:meta/meta.dart';
 /// manager.removeObserver(MyObserver1());
 /// ```
 mixin ObservableManagerMixin<T> on Manager<T> {
-  final List<ManagerObserver> _observers = [];
+  final List<ManagerObserverBase> _observers = [];
 
   @visibleForTesting
-  List<ManagerObserver> get observers => [..._observers];
+  List<ManagerObserverBase> get observers => [..._observers];
 
   @visibleForTesting
-  void addObserverTest(ManagerObserver observer) {
+  void addObserverTest(ManagerObserverBase observer) {
     addObserver(observer);
   }
 
   @visibleForTesting
-  void removeObserverTest(ManagerObserver observer) {
+  void removeObserverTest(ManagerObserverBase observer) {
     removeObserver(observer);
   }
 
@@ -47,16 +48,16 @@ mixin ObservableManagerMixin<T> on Manager<T> {
   void initializeTest() => initializeObservers();
 
   /// Adds an [observer] to the internal list of observers
-  void addObserver(ManagerObserver observer) {
+  void addObserver(ManagerObserverBase observer) {
     _observers.add(observer);
   }
 
   /// Removes an observer from the internal list of observers
-  void removeObserver(ManagerObserver observer) {
+  void removeObserver(ManagerObserverBase observer) {
     _observers.remove(observer);
   }
 
-  /// Triggers [ManagerObserver.onEvent] for all the observers in the internal list
+  /// Triggers [ManagerObserverBase.onEvent] for all the observers in the internal list
   @mustCallSuper
   @override
   void onEventCallback(TaskEvent<T> event) {
@@ -66,7 +67,7 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     super.onEventCallback(event);
   }
 
-  /// Triggers [ManagerObserver.onCreated] for all the observers in the internal list
+  /// Triggers [ManagerObserverBase.onCreated] for all the observers in the internal list
   @Deprecated(
     'The method was renamed to initializeObservers and will be removed in major releases',
   )
@@ -78,7 +79,7 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     }
   }
 
-  /// Triggers [ManagerObserver.onCreated] for all the observers in the internal list
+  /// Triggers [ManagerObserverBase.onCreated] for all the observers in the internal list
   ///
   /// Should be called in the constructor of a class
   @protected
@@ -88,7 +89,7 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     }
   }
 
-  /// Triggers [ManagerObserver.onDisposed] for all the observers in the internal lists
+  /// Triggers [ManagerObserverBase.onDisposed] for all the observers in the internal lists
   @mustCallSuper
   @override
   void dispose() {
@@ -99,7 +100,7 @@ mixin ObservableManagerMixin<T> on Manager<T> {
     super.dispose();
   }
 
-  /// Triggers [ManagerObserver.onStateMutated] for all the observers in the internal lists
+  /// Triggers [ManagerObserverBase.onStateMutated] for all the observers in the internal lists
   @mustCallSuper
   @override
   void mutateState(newState) {
