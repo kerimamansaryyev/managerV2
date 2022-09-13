@@ -1,3 +1,5 @@
+## 0.2.0
+Fix: Changing a type from `ManagerObserver` to `ManagerObserverBase` of `ObservableManagerMixin`'s methods. 
 ## 0.1.9
 Fix: Providing type parameters to `SingleManagerObserver`. 
 ## 0.1.8
