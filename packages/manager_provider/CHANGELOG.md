@@ -1,3 +1,5 @@
+## 0.2.0
+Added `SingleManagerWidgetsObserverMixin`.
 ## 0.1.9
 Exporting `MultiManagerProvider`.
 ## 0.1.8
