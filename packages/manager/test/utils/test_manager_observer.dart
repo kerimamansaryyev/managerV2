@@ -1,6 +1,7 @@
 import 'package:manager/src/models/manager.dart';
 import 'package:manager/src/models/observable_manager_mixin.dart';
 import 'package:manager/src/models/observer.dart';
+import 'package:meta/meta.dart';
 
 class TestCounterManagerTypeCheck1 extends Manager<int>
     with ObservableManagerMixin<int> {
@@ -15,6 +16,10 @@ class TestCounterManagerTypeCheck2 extends Manager<String>
 class TestObserver0 extends ManagerObserver {
   int eventCount = 0;
   bool hasStateMutated = false;
+  final void Function(dynamic oldState, dynamic newState)?
+      onStateMutatedCallback;
+
+  TestObserver0({this.onStateMutatedCallback});
 
   void tearDown() {
     eventCount = 0;
@@ -41,6 +46,7 @@ class TestObserver0 extends ManagerObserver {
   @override
   void onStateMutated(Manager manager, oldState, newState) {
     hasStateMutated = true;
+    onStateMutatedCallback?.call(oldState, newState);
     super.onStateMutated(manager, oldState, newState);
   }
 }
@@ -101,4 +107,28 @@ class TestCounterManager extends Manager<int> with ObservableManagerMixin<int> {
     _onCreatedCalled = 0;
     _onDisposeCalled = 0;
   }
+}
+
+class TestComplexStateObserver extends ManagerObserver {
+  final void Function(dynamic oldState, dynamic newState)?
+      onStateMutatedCallback;
+
+  TestComplexStateObserver({this.onStateMutatedCallback});
+
+  @override
+  void onStateMutated(Manager manager, oldState, newState) {
+    onStateMutatedCallback?.call(oldState, newState);
+  }
+}
+
+@immutable
+class TestComplexState {
+  final String message;
+
+  const TestComplexState({required this.message});
+}
+
+class TestComplexStateManager extends Manager<TestComplexState>
+    with ObservableManagerMixin {
+  TestComplexStateManager(super.initialValue);
 }

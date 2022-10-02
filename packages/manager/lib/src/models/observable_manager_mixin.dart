@@ -104,11 +104,11 @@ mixin ObservableManagerMixin<T> on Manager<T> {
   @mustCallSuper
   @override
   void mutateState(newState) {
-    final potentialState = newState;
+    final oldState = state;
     super.mutateState(newState);
     final finalState = state;
     for (var observer in _observers) {
-      observer.onStateMutated(this, potentialState, finalState);
+      observer.onStateMutated(this, oldState, finalState);
     }
   }
 }

@@ -161,7 +161,7 @@ void main() {
   });
 
   test(
-      'Observer\'s onEvent method is called whenever Manager\'s state is mutated',
+      'Observer\'s onStateMutated method is called whenever Manager\'s state is mutated',
       () async {
     test_manager_observer.TestCounterManager.tearDown();
     final manager = test_manager_observer.TestCounterManager(0);
@@ -203,6 +203,34 @@ void main() {
     expect(
       test_manager_observer.TestCounterManager.observer1.hasStateMutated,
       false,
+    );
+  });
+
+  test('onStateMutated exposes oldState and newState', () {
+    final manager = test_manager_observer.TestComplexStateManager(
+      test_manager_observer.TestComplexState(message: 'initial'),
+    );
+    manager.addObserver(
+      test_manager_observer.TestComplexStateObserver(
+        onStateMutatedCallback: (oldState, newState) {
+          expect(
+            (oldState as test_manager_observer.TestComplexState).message,
+            'initial',
+          );
+          expect(
+            (newState as test_manager_observer.TestComplexState).message,
+            'next',
+          );
+          expect(oldState != newState, true);
+        },
+      ),
+    );
+
+    manager.run(
+      SynchronousTask.generic(
+        id: 'one',
+        result: test_manager_observer.TestComplexState(message: 'next'),
+      ),
     );
   });
 

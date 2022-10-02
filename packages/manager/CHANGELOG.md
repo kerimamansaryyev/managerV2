@@ -1,3 +1,5 @@
+## 0.3.0
+Fixed an issue when the observers' `onStateMutated` exposed only the new state.
 ## 0.2.0
 Fix: Changing a type from `ManagerObserver` to `ManagerObserverBase` of `ObservableManagerMixin`'s methods. 
 ## 0.1.9
