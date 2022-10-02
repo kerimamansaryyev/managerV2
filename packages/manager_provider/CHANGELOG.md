@@ -1,3 +1,5 @@
+## 0.3.0
+Fixed an issue when the observers' `onStateMutated` exposed only the new state.
 ## 0.2.1
 Upgraded dependencies.
 ## 0.2.0
