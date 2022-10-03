@@ -1,3 +1,7 @@
+## 0.3.2
+Reverting `0.3.1`.
+
+Fixed an issue of successfull task events returning `TaskProgressStatus.error`.
 ## 0.3.1
 Exposing `progressStatus` getter of `TaskEvent`.
 ## 0.3.0
