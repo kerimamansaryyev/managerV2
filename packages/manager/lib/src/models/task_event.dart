@@ -30,6 +30,7 @@ extension TaskProgressStatusPublicGetExtension on TaskEvent? {
 /// A class that is used to represent a value emitted by [Manager.on]
 @immutable
 abstract class TaskEvent<T> {
+  @internal
   TaskProgressStatus get progressStatus;
   Task<T> get task;
 }
@@ -68,7 +69,7 @@ class TaskSuccessEvent<T> implements TaskEvent<T> {
   const TaskSuccessEvent(this.task, this.result);
 
   @override
-  TaskProgressStatus get progressStatus => TaskProgressStatus.error;
+  TaskProgressStatus get progressStatus => TaskProgressStatus.success;
 }
 
 /// A class that is used to represent a state when [CancelableAsyncTaskMixin]s are killed in [Manager.on].
