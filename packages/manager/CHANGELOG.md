@@ -1,3 +1,5 @@
+## 0.3.1
+Exposing `progressStatus` getter of `TaskEvent`.
 ## 0.3.0
 Fixed an issue when the observers' `onStateMutated` exposed only the new state.
 ## 0.2.0

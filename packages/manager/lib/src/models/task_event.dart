@@ -30,7 +30,6 @@ extension TaskProgressStatusPublicGetExtension on TaskEvent? {
 /// A class that is used to represent a value emitted by [Manager.on]
 @immutable
 abstract class TaskEvent<T> {
-  @internal
   TaskProgressStatus get progressStatus;
   Task<T> get task;
 }
