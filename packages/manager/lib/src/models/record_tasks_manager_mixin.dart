@@ -6,6 +6,9 @@ import 'package:meta/meta.dart';
 
 /// A special type of [Manager] that records events of [onEventCallback] and allows
 /// accessing them through [getRecordedEvent]
+@Deprecated(
+  'Starting from 0.4.0, Manager class supports the following methods of the mixin be default',
+)
 mixin RecordTaskEventsMixin<T> on Manager<T> {
   final Map<String, TaskEvent<T>> _eventTable = {};
 

@@ -1,11 +1,9 @@
 import 'package:manager/src/models/manager.dart';
-import 'package:manager/src/models/record_tasks_manager_mixin.dart';
 import 'package:manager/src/models/task.dart';
 import 'package:manager/src/models/task_event.dart';
 import 'package:test/test.dart';
 
-class TestRecordableCounterManager extends Manager<int>
-    with RecordTaskEventsMixin {
+class TestRecordableCounterManager extends Manager<int> {
   TestRecordableCounterManager(super.initialValue);
 }
 
@@ -21,12 +19,12 @@ void main() {
       ),
     );
     expect(
-      manager.getRecordedEvent(taskId: 'one').runtimeType,
+      manager.getEventSnapshot(taskId: 'one').runtimeType,
       TaskLoadingEvent<int>,
     );
     await manager.waitForTaskToBeDone(taskId: 'one');
     expect(
-      manager.getRecordedEvent(taskId: 'one').runtimeType,
+      manager.getEventSnapshot(taskId: 'one').runtimeType,
       TaskSuccessEvent<int>,
     );
   });

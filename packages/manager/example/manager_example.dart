@@ -53,8 +53,7 @@ class EventQueueDisplayObserver extends ManagerObserver {
   }
 }
 
-class CounterManager extends Manager<int>
-    with RecordTaskEventsMixin, ObservableManagerMixin {
+class CounterManager extends Manager<int> with ObservableManagerMixin {
   CounterManager(super.initialValue);
 }
 

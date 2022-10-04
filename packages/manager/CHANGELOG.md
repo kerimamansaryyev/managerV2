@@ -1,3 +1,5 @@
+## 0.4.0
+BREAKING CHANGE: Deprecated `RecordTaskEventsMixin` and moved all the methods of the mixin to `Manager`.
 ## 0.3.3
 Calling `onEventCallback` before passing the event to the stream controllers in `_passEvent` method.
 ## 0.3.2

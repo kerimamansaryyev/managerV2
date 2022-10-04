@@ -256,10 +256,3 @@ void main() async {
   manager.removeObserver(successCountObserver);
 }
 ```
-
-## RecordTaskEventsMixin
-Extend this mixin if you want to record and get references of fired task events in `Manager`.
-```dart
-// Getting recorded tasks
-manager.getRecordedEvent(taskId: 'id_of_task');
-```

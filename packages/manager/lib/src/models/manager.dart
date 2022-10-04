@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:async/async.dart';
 import 'package:manager/src/models/async_task_references.dart';
@@ -31,6 +32,7 @@ typedef AsyncTaskCompleterReferenceTable<T>
 /// - An each [Task] that was completed with [TaskSuccessEvent] will change the state through [mutateState].
 /// - You can track an every state change by listening to [onStateChanged]
 abstract class Manager<T> {
+  final Map<String, TaskEvent<T>> _eventSnapshotTable = {};
   final AsyncTaskCompleterReferenceTable<T> _references = {};
   final StreamController<T> _onStateChangedController =
       StreamController.broadcast();
@@ -47,6 +49,9 @@ abstract class Manager<T> {
       : _state = initialValue,
         _onStateChangedControllerWithLatest =
             BehaviorSubject.seeded(initialValue);
+  @protected
+  Map<String, TaskEvent<T>> get eventSnapshotTable =>
+      UnmodifiableMapView({..._eventSnapshotTable});
 
   /// If [dispose] was called on the manager
   bool get isDisposed => _isDisposed;
@@ -59,6 +64,11 @@ abstract class Manager<T> {
       StreamGroup.mergeBroadcast([on(), onStateChanged()]).map((event) {
         return;
       });
+
+  /// All events coming from [onEventCallback] are recorded in the [_eventSnapshotTable] map and can be accessed
+  /// by this method using [taskId].
+  TaskEvent<T>? getEventSnapshot({required String taskId}) =>
+      _eventSnapshotTable[safelyExtractTaskIdFromString(taskId)];
 
   /// Emits an event each time the [state] is changed in [mutateState]
   ///
@@ -118,6 +128,20 @@ abstract class Manager<T> {
     }
   }
 
+  /// Saves the [event] into [_eventSnapshotTable] map
+  @mustCallSuper
+  @protected
+  void recordEventSnapshot(TaskEvent<T> event) {
+    _eventSnapshotTable[safelyGetTaskIdFromTask(event.task)] = event;
+  }
+
+  /// Deletes an reference of the event of the [taskId] from the [_eventSnapshotTable] map
+  @mustCallSuper
+  @protected
+  void deleteRecordEventSnapshot({required String taskId}) {
+    _eventSnapshotTable.remove(safelyExtractTaskIdFromString(taskId));
+  }
+
   /// The method kills a task found by [taskId] and [TaskKillEvent] will be added to the [on] stream.
   ///
   /// It `won't` have effect if:
@@ -135,6 +159,7 @@ abstract class Manager<T> {
     if (task is! CancelableAsyncTaskMixin<T>) {
       return;
     }
+    deleteRecordEventSnapshot(taskId: taskId);
     return kill(task);
   }
 
@@ -175,7 +200,9 @@ abstract class Manager<T> {
 
   @mustCallSuper
   @protected
-  void onEventCallback(TaskEvent<T> event) {}
+  void onEventCallback(TaskEvent<T> event) {
+    recordEventSnapshot(event);
+  }
 
   @mustCallSuper
   @protected
