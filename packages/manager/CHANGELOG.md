@@ -1,3 +1,5 @@
+## 0.4.0+1
+Removed `deleteRecordEventSnapshot` to keep a linear architecture.
 ## 0.4.0
 BREAKING CHANGE: Deprecated `RecordTaskEventsMixin` and moved all the methods of the mixin to `Manager`.
 ## 0.3.3

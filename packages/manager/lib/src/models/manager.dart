@@ -135,13 +135,6 @@ abstract class Manager<T> {
     _eventSnapshotTable[safelyGetTaskIdFromTask(event.task)] = event;
   }
 
-  /// Deletes an reference of the event of the [taskId] from the [_eventSnapshotTable] map
-  @mustCallSuper
-  @protected
-  void deleteRecordEventSnapshot({required String taskId}) {
-    _eventSnapshotTable.remove(safelyExtractTaskIdFromString(taskId));
-  }
-
   /// The method kills a task found by [taskId] and [TaskKillEvent] will be added to the [on] stream.
   ///
   /// It `won't` have effect if:
@@ -159,7 +152,6 @@ abstract class Manager<T> {
     if (task is! CancelableAsyncTaskMixin<T>) {
       return;
     }
-    deleteRecordEventSnapshot(taskId: taskId);
     return kill(task);
   }
 
