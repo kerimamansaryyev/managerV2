@@ -1,6 +1,6 @@
 name: manager
 description: A dart package for predictable synchronous and asynchronous state management.
-version: 0.3.2
+version: 0.3.3
 
 repository: https://github.com/mcfugger/managerV2/tree/master/packages/manager
 

@@ -242,9 +242,9 @@ abstract class Manager<T> {
 
   void _passEvent(TaskEvent<T> event) {
     if (!isDisposed) {
+      onEventCallback(event);
       _onEventController.add(event);
       _onEventControllerWithLatestEvent.add(event);
-      onEventCallback(event);
     }
   }
 
