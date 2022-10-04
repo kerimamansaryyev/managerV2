@@ -1,3 +1,5 @@
+## 0.3.3
+Calling `onEventCallback` before passing the event to the stream controllers in `_passEvent` method.
 ## 0.3.2
 Reverting `0.3.1`.
 
