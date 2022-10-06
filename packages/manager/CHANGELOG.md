@@ -1,3 +1,5 @@
+## 0.4.1
+Calling `super.onEventCallback` in the beginning of `ObservableManagerMixin`. 
 ## 0.4.0+1
 Removed `deleteRecordEventSnapshot` to keep a linear architecture.
 ## 0.4.0

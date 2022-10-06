@@ -61,10 +61,10 @@ mixin ObservableManagerMixin<T> on Manager<T> {
   @mustCallSuper
   @override
   void onEventCallback(TaskEvent<T> event) {
+    super.onEventCallback(event);
     for (var observer in _observers) {
       observer.onEvent(this, event);
     }
-    super.onEventCallback(event);
   }
 
   /// Triggers [ManagerObserverBase.onCreated] for all the observers in the internal list
