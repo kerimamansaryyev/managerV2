@@ -65,7 +65,7 @@ void main() {
               return Text(value?.runtimeType.toString() ?? 'null');
             },
             selector: (context, manager) =>
-                manager.getRecordedEvent(taskId: 'one'),
+                manager.getEventSnapshot(taskId: 'one'),
             shouldUpdate: (prev, next) => prev != next,
           ),
         ),

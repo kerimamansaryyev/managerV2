@@ -4,7 +4,6 @@ class TestCounterManager extends Manager<int> {
   TestCounterManager(super.initialValue);
 }
 
-class TestRecordableCounterManager extends Manager<int>
-    with RecordTaskEventsMixin {
+class TestRecordableCounterManager extends Manager<int> {
   TestRecordableCounterManager(super.initialValue);
 }
