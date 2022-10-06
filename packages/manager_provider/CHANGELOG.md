@@ -1,3 +1,5 @@
+## 0.4.1+1
+Added the new widgets from `0.4.1` to the exports.
 ## 0.4.1
 - Synced with `manager:0.4.0+1`.
 - Added new widgets: `MultiTaskEventListener`, `TaskEventListener`.
