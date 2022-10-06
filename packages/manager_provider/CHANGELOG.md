@@ -1,3 +1,6 @@
+## 0.4.1
+- Synced with `manager:0.4.0+1`.
+- Added new widgets: `MultiTaskEventListener`, `TaskEventListener`.
 ## 0.3.3
 Calling `onEventCallback` before passing the event to the stream controllers in `_passEvent` method.
 ## 0.3.2
