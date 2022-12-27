@@ -7,6 +7,9 @@ void _emptyCallback() {}
 class ManagerSelector<M extends Manager, V> extends StatefulWidget
     with ManagerSelectorWidgetInterfaceMixin<M, V> {
   @override
+  final M? manager;
+
+  @override
   final ManagerSelectorBuilder<V> builder;
 
   @override
@@ -28,6 +31,7 @@ class ManagerSelector<M extends Manager, V> extends StatefulWidget
     Key? key,
     this.child,
     this.onUpdate = _emptyCallback,
+    this.manager,
   }) : super(key: key);
 
   @override

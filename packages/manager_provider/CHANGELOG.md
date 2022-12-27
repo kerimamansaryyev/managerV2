@@ -1,3 +1,5 @@
+## 0.4.3
+Added an option to provide custom `Manager` instance to the widgets that use `ManagerSelector`.
 ## 0.4.2
 Synced with `manager:0.4.1`.
 ## 0.4.1+1

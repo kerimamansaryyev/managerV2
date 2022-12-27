@@ -11,6 +11,7 @@ typedef ManagerConsumerUpdateCallback = void Function();
 void _emptyCallback() {}
 
 class ManagerConsumer<T extends Manager> extends StatelessWidget {
+  final T? manager;
   final ManagerConsumerBuilder<T> builder;
   final ManagerConsumerUpdateCallback onUpdate;
 
@@ -18,10 +19,12 @@ class ManagerConsumer<T extends Manager> extends StatelessWidget {
     required this.builder,
     Key? key,
     this.onUpdate = _emptyCallback,
+    this.manager,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) => ManagerSelector<T, T>(
+        manager: manager,
         builder: (context, manager, __) => builder(context, manager),
         selector: (context, manager) => manager,
         onUpdate: onUpdate,

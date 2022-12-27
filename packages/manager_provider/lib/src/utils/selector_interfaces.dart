@@ -18,6 +18,7 @@ typedef ManagerSelectorBuilder<V> = Widget Function(
 
 mixin ManagerSelectorWidgetInterfaceMixin<M extends Manager, V>
     on StatefulWidget {
+  M? get manager;
   ManagerSelectorExtractor<M, V> get selector;
   ManagerSelectedDecisionPredicate<V> get shouldUpdate;
   ManagerSelectorUpdateCallback get onUpdate;
@@ -43,13 +44,17 @@ mixin ManagerSelectorStateMixin<
     }
   }
 
-  M _getManager() => ManagerProvider.of<M>(context, listen: false);
+  M _getManager() =>
+      widget.manager ?? ManagerProvider.of<M>(context, listen: false);
 
   @mustCallSuper
   @protected
   void initSubscription() {
+    _subscription?.cancel();
+    _subscription = null;
+    final currentContext = context;
     final manager = _getManager();
-    _currentValue = widget.selector(context, manager);
+    _currentValue = widget.selector(currentContext, manager);
     _subscription = manager.onUpdated.listen((_) => _onManagerUpdated());
   }
 
@@ -57,6 +62,15 @@ mixin ManagerSelectorStateMixin<
   @protected
   void cancelSubscription() {
     _subscription?.cancel();
+  }
+
+  @override
+  void didUpdateWidget(covariant W oldWidget) {
+    if (oldWidget.manager != widget.manager) {
+      initSubscription();
+      _onManagerUpdated();
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   Widget childBuilder(BuildContext context) =>

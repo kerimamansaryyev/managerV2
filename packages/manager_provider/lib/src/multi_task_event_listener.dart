@@ -14,6 +14,7 @@ typedef MultiTaskEventListenerWidgetBuilder = Widget Function(
 );
 
 class MultiTaskEventListener<M extends Manager> extends StatelessWidget {
+  final M? manager;
   final MultiTaskEventListenerWidgetBuilder builder;
   final List<String> taskIds;
   final MultiTaskEventListenerUpdatePredicate shouldUpdate;
@@ -22,6 +23,7 @@ class MultiTaskEventListener<M extends Manager> extends StatelessWidget {
   const MultiTaskEventListener({
     required this.builder,
     required this.taskIds,
+    this.manager,
     this.shouldUpdate = _defaultUpdatePredicate,
     this.child,
     super.key,
@@ -30,6 +32,7 @@ class MultiTaskEventListener<M extends Manager> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ManagerSelector<M, List<TaskEvent?>>(
+      manager: manager,
       builder: builder,
       selector: (context, manager) =>
           [for (var id in taskIds) manager.getEventSnapshot(taskId: id)],

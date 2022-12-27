@@ -14,6 +14,7 @@ typedef TaskEventListenerWidgetBuilder = Widget Function(
 );
 
 class TaskEventListener<M extends Manager> extends StatelessWidget {
+  final M? manager;
   final TaskEventListenerWidgetBuilder builder;
   final String taskId;
   final TaskEventListenerUpdatePredicate shouldUpdate;
@@ -24,12 +25,14 @@ class TaskEventListener<M extends Manager> extends StatelessWidget {
     required this.taskId,
     this.shouldUpdate = _defaultUpdatePredicate,
     this.child,
+    this.manager,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return ManagerSelector<M, TaskEvent?>(
+      manager: manager,
       builder: builder,
       selector: (context, manager) => manager.getEventSnapshot(taskId: taskId),
       shouldUpdate: shouldUpdate,
